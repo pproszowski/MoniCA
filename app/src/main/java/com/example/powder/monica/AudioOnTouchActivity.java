@@ -4,21 +4,17 @@ import java.io.IOException;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.pm.PackageManager;
+import android.content.Intent;
 import android.media.MediaRecorder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 public class AudioOnTouchActivity extends Activity {
-    private Button b1;
+    private TouchableButton recordButton;
     private TextView t;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
     private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
@@ -29,20 +25,23 @@ public class AudioOnTouchActivity extends Activity {
     private int output_formats[] = { MediaRecorder.OutputFormat.MPEG_4, MediaRecorder.OutputFormat.THREE_GPP };
     private String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
     private static String[] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    private String recordedFileName;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS);
-        setContentView(R.layout.activity_main);
-        b1 = findViewById(R.id.button1);
+        setContentView(R.layout.activity_audio_on_touch);
 
-        b1.setOnTouchListener(new View.OnTouchListener() {
+        recordButton = findViewById(R.id.recordButton);
+        t = findViewById(R.id.textView);
+
+        recordButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch(event.getAction()){
                     case MotionEvent.ACTION_DOWN:
+                        t.setText("recording");
                         AppLog.logString("Start Recording");
                         startRecording();
                         break;
@@ -72,8 +71,9 @@ public class AudioOnTouchActivity extends Activity {
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(output_formats[currentFormat]);
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        recorder.setOutputFile(getFilename());
-        AppLog.logString(getFilename());
+        recordedFileName = getFilename();
+        recorder.setOutputFile(recordedFileName);
+        AppLog.logString("I CREATE: " + recordedFileName);
         recorder.setOnErrorListener(errorListener);
         recorder.setOnInfoListener(infoListener);
 
@@ -100,12 +100,32 @@ public class AudioOnTouchActivity extends Activity {
     };
 
     private void stopRecording(){
-        if(null != recorder){
+        try {
             recorder.stop();
+            t.setText(recordedFileName);
+        }catch (RuntimeException e){
+            AppLog.logString("Stopped recording immediately after start");
+            AppLog.logString(recordedFileName + " should be deleted");
+            File file = new File(recordedFileName);
+            if(file.delete()){
+                AppLog.logString(recordedFileName + " has been deleted");
+            }
+            t.setText("Record too short");
+        }
+
+        if(recorder != null){
             recorder.reset();
             recorder.release();
 
             recorder = null;
         }
+    }
+
+    public void goToStorage(View view) {
+
+        Intent intent = new Intent(this, StorageActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+
     }
 }
