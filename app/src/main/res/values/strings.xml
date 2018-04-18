@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">MoniCA</string>
-    <string name="hello">hello!</string>
+    <string name="hello">Touch button to start recording…</string>
+    <string name="title_activity_storage">StorageActivity</string>
+    <string name="record">Record</string>
+    <string name="storage">Storage</string>
+    <string name="back_to_records">Back To Records</string>
 </resources>
