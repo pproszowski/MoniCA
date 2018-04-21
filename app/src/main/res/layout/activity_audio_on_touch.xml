@@ -40,4 +40,16 @@
         app:layout_constraintVertical_bias="1.0"
         tools:text="Storage" />
 
+    <TextView
+        android:id="@+id/sizeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recordButton"
+        tools:layout_editor_absoluteX="163dp" />
+
 </android.support.constraint.ConstraintLayout>
