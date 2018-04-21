@@ -1,6 +1,7 @@
 package com.example.powder.monica;
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 
 import android.Manifest;
 import android.app.Activity;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 public class AudioOnTouchActivity extends Activity {
     private TouchableButton recordButton;
     private TextView t;
+    private TextView sizeText;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
     private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
     private static final String AUDIO_RECORDER_FOLDER = "AudioRecorder";
@@ -26,6 +28,7 @@ public class AudioOnTouchActivity extends Activity {
     private String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
     private static String[] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private String recordedFileName;
+    private double size;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,6 +38,7 @@ public class AudioOnTouchActivity extends Activity {
 
         recordButton = findViewById(R.id.recordButton);
         t = findViewById(R.id.textView);
+        sizeText = findViewById(R.id.sizeText);
 
         recordButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -55,6 +59,19 @@ public class AudioOnTouchActivity extends Activity {
         });
     }
 
+    protected void onResume() {
+        super.onResume();
+        String path = Environment.getExternalStorageDirectory().getPath() + "/AudioRecorder";
+        size = 0;
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+
+        for (File file : files) {
+            size += file.length();
+        }
+        sizeText.setText( "Size : " +size/1000+ "KB");
+    }
+
     private String getFilename(){
         String filepath = Environment.getExternalStorageDirectory().getPath();
         File file = new File(filepath,AUDIO_RECORDER_FOLDER);
@@ -63,7 +80,10 @@ public class AudioOnTouchActivity extends Activity {
             file.mkdir();
         }
 
-        return (file.getAbsolutePath() + "/" + System.currentTimeMillis() + file_exts[currentFormat]);
+        return (file.getAbsolutePath() + "/" + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+":"+ Calendar.getInstance().get(Calendar.MINUTE)+":"
+                +Calendar.getInstance().get(Calendar.SECOND)+file_exts[currentFormat]) ;
+
+
     }
 
     private void startRecording(){
@@ -101,8 +121,15 @@ public class AudioOnTouchActivity extends Activity {
 
     private void stopRecording(){
         try {
+
             recorder.stop();
+
+            size+=new File(recordedFileName).length();
             t.setText(recordedFileName);
+            sizeText.setText( "Size : " +size/1000+ "KB");
+
+
+
         }catch (RuntimeException e){
             AppLog.logString("Stopped recording immediately after start");
             AppLog.logString(recordedFileName + " should be deleted");
