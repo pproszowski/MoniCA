@@ -28,7 +28,7 @@ public class StorageActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         overridePendingTransition(0, 0);
-        String path = Environment.getExternalStorageDirectory().getPath()+"/AudioRecorder";
+        String path = Environment.getExternalStorageDirectory().getPath()+"/AudioRecorder/"+getIntent().getExtras().get("Name").toString()+"/";
         File directory = new File(path);
         filesNames = new ArrayList<>();
         files = directory.listFiles();
