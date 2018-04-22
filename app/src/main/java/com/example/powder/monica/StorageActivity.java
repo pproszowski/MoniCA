@@ -17,16 +17,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 public class StorageActivity extends ListActivity {
     private double size;
     private File[] files;
     private List<String> filesNames;
+    private String name;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        name=getIntent().getExtras().get("Name").toString();
         overridePendingTransition(0, 0);
         String path = Environment.getExternalStorageDirectory().getPath()+"/AudioRecorder/"+getIntent().getExtras().get("Name").toString()+"/";
         File directory = new File(path);

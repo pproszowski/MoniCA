@@ -13,10 +13,12 @@ import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class MainMenuActivity extends Activity {
     private TouchableButton recordButton;
+    private Button ftp;
     private TextView t;
     private TextView sizeText;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
@@ -46,6 +48,10 @@ public class MainMenuActivity extends Activity {
         recordButton = findViewById(R.id.recordButton);
         t = findViewById(R.id.textView);
         sizeText = findViewById(R.id.sizeText);
+        ftp=findViewById(R.id.ftp);
+        ftp.setOnClickListener((view)->{
+            new FTP(recorderName, recorderName2).execute();
+        });
 
         recordButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
