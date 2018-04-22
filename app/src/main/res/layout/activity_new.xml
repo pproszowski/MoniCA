@@ -25,6 +25,7 @@
         tools:layout_editor_absoluteX="8dp">
 
         <android.support.design.widget.TextInputEditText
+            android:id="@+id/email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Aredsy email" />
