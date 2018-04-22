@@ -1,7 +1,11 @@
 package com.example.powder.monica;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Scanner;
 import java.util.jar.Attributes;
 
 import android.Manifest;
@@ -19,6 +23,7 @@ import android.widget.TextView;
 public class MainMenuActivity extends Activity {
     private TouchableButton recordButton;
     private Button ftp;
+    private Button email;
     private TextView t;
     private TextView sizeText;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
@@ -49,26 +54,58 @@ public class MainMenuActivity extends Activity {
         t = findViewById(R.id.textView);
         sizeText = findViewById(R.id.sizeText);
         ftp=findViewById(R.id.ftp);
+        email=findViewById(R.id.email);
         ftp.setOnClickListener((view)->{
             new FTP(recorderName, recorderName2).execute();
         });
 
-        recordButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch(event.getAction()){
-                    case MotionEvent.ACTION_DOWN:
-                        t.setText("recording");
-                        AppLog.logString("Start Recording");
-                        startRecording();
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        AppLog.logString("Stop Recording");
-                        stopRecording();
-                        break;
-                }
-                return false;
+        email.setOnClickListener((view)->{
+
+            String path = Environment.getExternalStorageDirectory().getPath() +"/"+recorderName+"/"+recorderName2;
+            File file = new File (path,"email.txt");
+            Scanner in = null;
+            try {
+                in=new Scanner(file);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
+
+
+            List<String> adrsy=new ArrayList<>();
+
+            if(file.exists()) {
+
+                while(in.hasNext())
+                {
+                    adrsy.add(in.nextLine());
+                }
+
+
+                String a[] = new String[0];
+                Intent email = new Intent(Intent.ACTION_SEND);
+                email.putExtra(Intent.EXTRA_EMAIL, adrsy.toArray(a));
+                email.putExtra(Intent.EXTRA_SUBJECT, recorderName2);
+                email.putExtra(Intent.EXTRA_TEXT, "MoniCA");
+                email.setType("message/rfc822");
+                startActivity(Intent.createChooser(email, "Choose an Email client :"));
+            }
+            });
+
+
+
+        recordButton.setOnTouchListener((v, event) -> {
+            switch(event.getAction()){
+                case MotionEvent.ACTION_DOWN:
+                    t.setText("recording");
+                    AppLog.logString("Start Recording");
+                    startRecording();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    AppLog.logString("Stop Recording");
+                    stopRecording();
+                    break;
+            }
+            return false;
         });
     }
 
