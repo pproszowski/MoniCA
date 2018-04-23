@@ -12,6 +12,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -61,8 +62,25 @@ public class MainMenuActivity extends Activity {
 
         email.setOnClickListener((view)->{
 
+
+            ArrayList<Uri> pliki = new ArrayList<>();
+
+
             String path = Environment.getExternalStorageDirectory().getPath() +"/"+recorderName+"/"+recorderName2;
+            File directory = new File(path);
+
+            File[] files = directory.listFiles();
+
+            for (File file : files) {
+
+                pliki.add(Uri.fromFile(file));
+
+            }
+
+
             File file = new File (path,"email.txt");
+
+
             Scanner in = null;
             try {
                 in=new Scanner(file);
@@ -82,7 +100,8 @@ public class MainMenuActivity extends Activity {
 
 
                 String a[] = new String[0];
-                Intent email = new Intent(Intent.ACTION_SEND);
+                Intent email = new Intent(Intent.ACTION_SEND_MULTIPLE);
+                email.putParcelableArrayListExtra(Intent.EXTRA_STREAM, pliki);
                 email.putExtra(Intent.EXTRA_EMAIL, adrsy.toArray(a));
                 email.putExtra(Intent.EXTRA_SUBJECT, recorderName2);
                 email.putExtra(Intent.EXTRA_TEXT, "MoniCA");
