@@ -42,14 +42,14 @@ public class New extends AppCompatActivity {
                     plik = new File(path, "email.txt");
 
                     try {
-                        zapis = new PrintWriter(path+"/email.txt");
+                        zapis = new PrintWriter(path+"/email.txt");;
                     } catch (FileNotFoundException e) {
                         System.out.println(e.getMessage());
                     }
-
-                    zapis.println(emailName.getText().toString());
-                    zapis.close();
-
+                    if(zapis!=null) {
+                        zapis.println(emailName.getText().toString());
+                        zapis.close();
+                    }
                     Intent newIntent = new Intent(New.this, MainMenuActivity.class);
                     newIntent.putExtra("Name",name.getText());
                     startActivity(newIntent);
