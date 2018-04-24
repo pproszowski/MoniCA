@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class StorageActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        name=getIntent().getExtras().get("Name").toString();
+        name = getIntent().getExtras().get("Name").toString();
         overridePendingTransition(0, 0);
         String path = Environment.getExternalStorageDirectory().getPath()+"/AudioRecorder/"+getIntent().getExtras().get("Name").toString()+"/";
         File directory = new File(path);
@@ -59,6 +60,7 @@ public class StorageActivity extends ListActivity {
                     e.printStackTrace();
                 }
 
+            Toast.makeText(getApplicationContext(), files[position].getName(), Toast.LENGTH_SHORT).show();
 
         });
 

@@ -1,0 +1,38 @@
+package com.example.powder.monica;
+
+import android.app.ListActivity;
+import android.content.Intent;
+import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.Arrays;
+import java.util.List;
+
+public class OpenExistingMeetingActivity extends ListActivity{
+    private String recorderName;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        recorderName = getIntent().getExtras().getString("recorderName");
+        String path = Environment.getExternalStorageDirectory().getPath() +"/"+recorderName;
+        File file = new File(path);
+        String[] meetings = file.list((dir, name) -> new File(dir, name).isDirectory());
+
+        setListAdapter(new ArrayAdapter<>(this, R.layout.activity_storage,Arrays.asList(meetings)));
+        ListView listView = getListView();
+        listView.setTextFilterEnabled(true);
+
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            Intent onTouchActivity = new Intent(OpenExistingMeetingActivity.this, AudioOnTouchActivity.class);
+            onTouchActivity.putExtra("recorderName", recorderName);
+            onTouchActivity.putExtra("Name", meetings[position]);
+            startActivity(onTouchActivity);
+        });
+    }
+}

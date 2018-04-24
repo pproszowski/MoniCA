@@ -12,6 +12,7 @@ public class MainMenuActivity extends AppCompatActivity {
     private static final int REQUEST_PERMISSIONS = 200;
     private static String[] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE};
     Button buttonNew, buttonOpen, buttonExit;
+    private static final String recorderName = "AudioRecorder";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,15 +27,15 @@ public class MainMenuActivity extends AppCompatActivity {
 
         buttonNew.setOnClickListener(view -> {
             Intent newFolderActivity = new Intent(MainMenuActivity.this, NewMeetingActivity.class);
+            newFolderActivity.putExtra("recorderName", "AudioRecorder");
             startActivity(newFolderActivity);
 
         });
 
         buttonOpen.setOnClickListener(view -> {
-/*
-            Intent openFolderActivity = new Intent(AudioOnTouchActivity.this, <OPENACTIVITY>.class);
-            startActivity(openFolderActivity);
-*/
+            Intent openExistingMeetingActivity = new Intent(MainMenuActivity.this, OpenExistingMeetingActivity.class);
+            openExistingMeetingActivity.putExtra("recorderName", "AudioRecorder");
+            startActivity(openExistingMeetingActivity);
         });
 
         buttonExit.setOnClickListener(view -> {

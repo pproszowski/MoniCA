@@ -28,7 +28,7 @@ public class AudioOnTouchActivity extends Activity {
     private TextView sizeText;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
     private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
-    private String recorderName = "AudioRecorder";
+    private String recorderName;
     private String meetingName = "";
     private MediaRecorder recorder = null;
     private int currentFormat = 0;
@@ -42,8 +42,8 @@ public class AudioOnTouchActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_audio_on_touch);
-
-        meetingName = getIntent().getExtras().get("Name").toString();
+        recorderName = getIntent().getExtras().getString("recorderName");
+        meetingName = getIntent().getExtras().getString("Name");
         AppLog.logString(meetingName);
 
         recordButton = findViewById(R.id.recordButton);
