@@ -25,7 +25,7 @@ public class MainMenuActivity extends AppCompatActivity {
         buttonExit = findViewById(R.id.button_exit);
 
         buttonNew.setOnClickListener(view -> {
-            Intent newFolderActivity = new Intent(MainMenuActivity.this, New.class);
+            Intent newFolderActivity = new Intent(MainMenuActivity.this, NewMeetingActivity.class);
             startActivity(newFolderActivity);
 
         });

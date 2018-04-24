@@ -6,14 +6,13 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
-public class New extends AppCompatActivity {
+public class NewMeetingActivity extends AppCompatActivity {
 
     private Button confirmButton;
     private TextInputEditText meetingName;
@@ -54,7 +53,7 @@ public class New extends AppCompatActivity {
                         writer.println(inputEmail.getText().toString());
                         writer.close();
                     }
-                    Intent newIntent = new Intent(New.this, AudioOnTouchActivity.class);
+                    Intent newIntent = new Intent(NewMeetingActivity.this, AudioOnTouchActivity.class);
                     newIntent.putExtra("Name", meetingName.getText());
                     startActivity(newIntent);
                 }

@@ -3,17 +3,17 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="com.example.powder.monica.New$GeneralPreferenceFragment"
+        android:fragment="com.example.powder.monica.NewMeetingActivity$GeneralPreferenceFragment"
         android:icon="@drawable/ic_info_black_24dp"
         android:title="@string/pref_header_general" />
 
     <header
-        android:fragment="com.example.powder.monica.New$NotificationPreferenceFragment"
+        android:fragment="com.example.powder.monica.NewMeetingActivity$NotificationPreferenceFragment"
         android:icon="@drawable/ic_notifications_black_24dp"
         android:title="@string/pref_header_notifications" />
 
     <header
-        android:fragment="com.example.powder.monica.New$DataSyncPreferenceFragment"
+        android:fragment="com.example.powder.monica.NewMeetingActivity$DataSyncPreferenceFragment"
         android:icon="@drawable/ic_sync_black_24dp"
         android:title="@string/pref_header_data_sync" />
 
