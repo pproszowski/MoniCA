@@ -1,236 +1,54 @@
 package com.example.powder.monica;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Scanner;
-import java.util.jar.Attributes;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
-import android.media.MediaRecorder;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
-import android.view.MotionEvent;
-import android.view.View;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.widget.Button;
-import android.widget.TextView;
 
-public class MainMenuActivity extends Activity {
-    private TouchableButton recordButton;
-    private Button ftp;
-    private Button email;
-    private TextView t;
-    private TextView sizeText;
-    private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
-    private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
-    private String recorderName = "AudioRecorder";
-    private String recorderName2 = "AudioRecorder";
+public class MainMenuActivity extends AppCompatActivity {
+
     private static final int REQUEST_PERMISSIONS = 200;
-    private MediaRecorder recorder = null;
-    private int currentFormat = 0;
-    private int output_formats[] = { MediaRecorder.OutputFormat.MPEG_4, MediaRecorder.OutputFormat.THREE_GPP };
-    private String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
     private static String[] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-    private String recordedFileName;
-    private double size;
+    Button buttonNew, buttonOpen, buttonExit;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle savedInstanceState) {
         ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS);
-        setContentView(R.layout.activity_audio_on_touch);
 
-        recorderName2=getIntent().getExtras().get("Name").toString();
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main_menu);
 
-        System.out.println(recorderName2);
+        buttonNew = findViewById(R.id.button_new);
+        buttonOpen = findViewById(R.id.button_open);
+        buttonExit = findViewById(R.id.button_exit);
 
+        buttonNew.setOnClickListener(view -> {
+            Intent newFolderActivity = new Intent(MainMenuActivity.this, New.class);
+            startActivity(newFolderActivity);
 
-        recordButton = findViewById(R.id.recordButton);
-        t = findViewById(R.id.textView);
-        sizeText = findViewById(R.id.sizeText);
-        ftp=findViewById(R.id.ftp);
-        email=findViewById(R.id.email);
-        ftp.setOnClickListener((view)->{
-            new FTP(recorderName, recorderName2).execute();
         });
 
-        email.setOnClickListener((view)->{
-
-
-            ArrayList<Uri> pliki = new ArrayList<>();
-
-
-            String path = Environment.getExternalStorageDirectory().getPath() +"/"+recorderName+"/"+recorderName2;
-            File directory = new File(path);
-
-            File[] files = directory.listFiles();
-
-            for (File file : files) {
-
-                pliki.add(Uri.fromFile(file));
-
-            }
-
-
-            File file = new File (path,"email.txt");
-
-
-            Scanner in = null;
-            try {
-                in=new Scanner(file);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-
-            List<String> adrsy=new ArrayList<>();
-
-            if(file.exists()) {
-
-                while(in.hasNext())
-                {
-                    adrsy.add(in.nextLine());
-                }
-
-
-                String a[] = new String[0];
-                Intent email = new Intent(Intent.ACTION_SEND_MULTIPLE);
-                email.putParcelableArrayListExtra(Intent.EXTRA_STREAM, pliki);
-                email.putExtra(Intent.EXTRA_EMAIL, adrsy.toArray(a));
-                email.putExtra(Intent.EXTRA_SUBJECT, recorderName2);
-                email.putExtra(Intent.EXTRA_TEXT, "MoniCA");
-                email.setType("message/rfc822");
-                startActivity(Intent.createChooser(email, "Choose an Email client :"));
-            }
-            });
-
-
-
-        recordButton.setOnTouchListener((v, event) -> {
-            switch(event.getAction()){
-                case MotionEvent.ACTION_DOWN:
-                    t.setText("recording");
-                    AppLog.logString("Start Recording");
-                    startRecording();
-                    break;
-                case MotionEvent.ACTION_UP:
-                    AppLog.logString("Stop Recording");
-                    stopRecording();
-                    break;
-            }
-            return false;
+        buttonOpen.setOnClickListener(view -> {
+/*
+            Intent openFolderActivity = new Intent(AudioOnTouchActivity.this, <OPENACTIVITY>.class);
+            startActivity(openFolderActivity);
+*/
         });
-    }
 
-    protected void onResume() {
-        super.onResume();
+        buttonExit.setOnClickListener(view -> {
+            moveTaskToBack(true);
+            android.os.Process.killProcess(android.os.Process.myPid());
+            System.exit(1);
+        });
 
-        String path = Environment.getExternalStorageDirectory().getPath() +"/"+recorderName+"/"+recorderName2;
 
 
-        size = 0;
-        File directory = new File(path);
-
-        if(!directory.exists()){
-            directory.mkdirs();
-        }
-
-        File[] files = directory.listFiles();
-
-        for (File file : files) {
-            size += file.length();
-        }
-        sizeText.setText( "Size : " +size/1000+ "KB");
-    }
-
-    private String getFilename(){
-        String filepath = Environment.getExternalStorageDirectory().getPath();
-        File file = new File(filepath,recorderName+"/"+recorderName2);
-
-        if(!file.exists()){
-            file.mkdirs();
-        }
-
-        return (file.getAbsolutePath() + "/" + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+":"+ Calendar.getInstance().get(Calendar.MINUTE)+":"
-                +Calendar.getInstance().get(Calendar.SECOND)+file_exts[currentFormat]) ;
 
 
     }
 
-    private void startRecording(){
-        recorder = new MediaRecorder();
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(output_formats[currentFormat]);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        recordedFileName = getFilename();
-        recorder.setOutputFile(recordedFileName);
-        AppLog.logString("I CREATE: " + recordedFileName);
-        recorder.setOnErrorListener(errorListener);
-        recorder.setOnInfoListener(infoListener);
-
-        try {
-            recorder.prepare();
-            recorder.start();
-        } catch (IllegalStateException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private MediaRecorder.OnErrorListener errorListener = new MediaRecorder.OnErrorListener() {
-        @Override
-        public void onError(MediaRecorder mr, int what, int extra) {
-            AppLog.logString("Error: " + what + ", " + extra);
-        }
-    };
-
-    private MediaRecorder.OnInfoListener infoListener = new MediaRecorder.OnInfoListener() {
-        @Override
-        public void onInfo(MediaRecorder mr, int what, int extra) {
-            AppLog.logString("Warning: " + what + ", " + extra);
-        }
-    };
-
-    private void stopRecording(){
-        try {
-
-            recorder.stop();
-
-            size+=new File(recordedFileName).length();
-            t.setText(recordedFileName);
-            sizeText.setText( "Size : " +size/1000+ "KB");
 
 
-
-        }catch (RuntimeException e){
-            AppLog.logString("Stopped recording immediately after start");
-            AppLog.logString(recordedFileName + " should be deleted");
-            File file = new File(recordedFileName);
-            if(file.delete()){
-                AppLog.logString(recordedFileName + " has been deleted");
-            }
-            t.setText("Record too short");
-        }
-
-        if(recorder != null){
-            recorder.reset();
-            recorder.release();
-
-            recorder = null;
-        }
-    }
-
-    public void goToStorage(View view) {
-
-        Intent intent = new Intent(this, StorageActivity.class);
-        intent.putExtra("Name", recorderName2);
-        startActivity(intent);
-        overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
-
-    }
 }

@@ -78,4 +78,10 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+    <string name="recording">recording</string>
+    <string name="record_too_short">Record too short</string>
+    <string name="adresy_email">Adresy Email</string>
+    <string name="create">Utwórz</string>
+    <string name="name_of_the_meeting">Nazwa Spotkania</string>
+    <string name="meeting_name">Nazwa Spotkania</string>
 </resources>
