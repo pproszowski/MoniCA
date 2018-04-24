@@ -11,6 +11,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.jar.Attributes;
 
 public class NewMeetingActivity extends AppCompatActivity {
 
@@ -20,7 +21,7 @@ public class NewMeetingActivity extends AppCompatActivity {
     private File directory;
     private PrintWriter writer;
     private TextInputEditText inputEmail;
-
+    private String recorderName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +30,7 @@ public class NewMeetingActivity extends AppCompatActivity {
         confirmButton = findViewById(R.id.confirmThis);
         meetingName = findViewById(R.id.meetingNameInput);
         inputEmail = findViewById(R.id.emailInput);
+        recorderName = getIntent().getExtras().getString("recorderName");
 
         confirmButton.setOnClickListener((view) ->
                 {
@@ -54,7 +56,8 @@ public class NewMeetingActivity extends AppCompatActivity {
                         writer.close();
                     }
                     Intent newIntent = new Intent(NewMeetingActivity.this, AudioOnTouchActivity.class);
-                    newIntent.putExtra("Name", meetingName.getText());
+                    newIntent.putExtra("Name", meetingName.getText().toString());
+                    newIntent.putExtra("recorderName", recorderName.toString());
                     startActivity(newIntent);
                 }
         );

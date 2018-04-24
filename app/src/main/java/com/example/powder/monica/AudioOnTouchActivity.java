@@ -43,6 +43,7 @@ public class AudioOnTouchActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_audio_on_touch);
         recorderName = getIntent().getExtras().getString("recorderName");
+
         meetingName = getIntent().getExtras().getString("Name");
         AppLog.logString(meetingName);
 
