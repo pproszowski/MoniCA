@@ -38,9 +38,10 @@ public class StorageActivity extends ListActivity {
         files = directory.listFiles();
 
         for (File file : files) {
-            filesNames.add(file.getName()+" size :"+file.length()/1000+"KBytes");
-            size+=file.length();
-
+            if(!file.getName().equals("email.txt")){
+                filesNames.add(file.getName()+" size: "+file.length()/1000+"KBytes");
+                size+=file.length();
+            }
         }
 
         System.out.println(size/1000);
@@ -63,8 +64,6 @@ public class StorageActivity extends ListActivity {
             Toast.makeText(getApplicationContext(), files[position].getName(), Toast.LENGTH_SHORT).show();
 
         });
-
-
 
         listView.setOnItemLongClickListener((AdapterView<?> parent, View view, int position, long id)->
 
