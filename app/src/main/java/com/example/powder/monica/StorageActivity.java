@@ -53,7 +53,9 @@ public class StorageActivity extends ListActivity {
         listView.setOnItemClickListener((parent, view, position, id) -> {
 
                 MediaPlayer mediaPlayer = new MediaPlayer();
+                if(position!=0) //to avoid playing email.txt
                 try {
+                    mediaPlayer.reset();
                     mediaPlayer.setDataSource(files[position].getAbsolutePath());
                     mediaPlayer.prepare();
                     mediaPlayer.start();

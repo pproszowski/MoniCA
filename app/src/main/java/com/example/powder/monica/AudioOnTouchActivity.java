@@ -32,7 +32,7 @@ public class AudioOnTouchActivity extends Activity {
     private String meetingName = "";
     private MediaRecorder recorder = null;
     private int currentFormat = 0;
-    private int output_formats[] = { MediaRecorder.OutputFormat.MPEG_4, MediaRecorder.OutputFormat.THREE_GPP };
+    private int output_formats[] = { MediaRecorder.OutputFormat.DEFAULT, MediaRecorder.OutputFormat.THREE_GPP };
     private String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
     private String recordedFileName;
     private double size;
@@ -157,7 +157,7 @@ public class AudioOnTouchActivity extends Activity {
             file.mkdirs();
         }
 
-        return (file.getAbsolutePath() + "/" + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+":"+ Calendar.getInstance().get(Calendar.MINUTE)+":"
+        return (file.getAbsolutePath() + "/Rec " + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+":"+ Calendar.getInstance().get(Calendar.MINUTE)+":"
                 +Calendar.getInstance().get(Calendar.SECOND)+file_exts[currentFormat]) ;
 
 
@@ -167,7 +167,7 @@ public class AudioOnTouchActivity extends Activity {
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(output_formats[currentFormat]);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
         recordedFileName = getFilename();
         recorder.setOutputFile(recordedFileName);
         AppLog.logString("I CREATE: " + recordedFileName);
