@@ -43,9 +43,6 @@ public class StorageActivity extends ListActivity {
                 filesNames.add(file.getName()+" size: "+file.length()/1000+"KBytes");
                 size+=file.length();
             }
-            else{
-                file.delete();
-            }
         }
 
         System.out.println(size/1000);
@@ -55,9 +52,8 @@ public class StorageActivity extends ListActivity {
         listView.setTextFilterEnabled(true);
 
         listView.setOnItemClickListener((parent, view, position, id) -> {
-
+                position++;
                 MediaPlayer mediaPlayer = new MediaPlayer();
-
                     try {
                         mediaPlayer.reset();
                         mediaPlayer.setDataSource(files[position].getAbsolutePath());
