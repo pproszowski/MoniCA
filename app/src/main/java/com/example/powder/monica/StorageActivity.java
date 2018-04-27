@@ -37,10 +37,14 @@ public class StorageActivity extends ListActivity {
         filesNames = new ArrayList<>();
         files = directory.listFiles();
 
+
         for (File file : files) {
             if(!file.getName().equals("email.txt")){
                 filesNames.add(file.getName()+" size: "+file.length()/1000+"KBytes");
                 size+=file.length();
+            }
+            else{
+                file.delete();
             }
         }
 
@@ -53,17 +57,17 @@ public class StorageActivity extends ListActivity {
         listView.setOnItemClickListener((parent, view, position, id) -> {
 
                 MediaPlayer mediaPlayer = new MediaPlayer();
-                if(position!=0) //to avoid playing email.txt
-                try {
-                    mediaPlayer.reset();
-                    mediaPlayer.setDataSource(files[position].getAbsolutePath());
-                    mediaPlayer.prepare();
-                    mediaPlayer.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
 
-            Toast.makeText(getApplicationContext(), files[position].getName(), Toast.LENGTH_SHORT).show();
+                    try {
+                        mediaPlayer.reset();
+                        mediaPlayer.setDataSource(files[position].getAbsolutePath());
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    Toast.makeText(getApplicationContext(), files[position].getName(), Toast.LENGTH_SHORT).show();
 
         });
 
