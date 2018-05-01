@@ -1,24 +1,19 @@
 package com.example.powder.monica;
 
 import android.app.ListActivity;
-import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Environment;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 
 public class StorageActivity extends ListActivity {
     private double size;
@@ -56,7 +51,8 @@ public class StorageActivity extends ListActivity {
                 MediaPlayer mediaPlayer = new MediaPlayer();
                     try {
                         mediaPlayer.reset();
-                        mediaPlayer.setDataSource(files[position].getAbsolutePath());
+                        String filePath = files[position].getAbsolutePath();
+                        mediaPlayer.setDataSource(filePath);
                         mediaPlayer.prepare();
                         mediaPlayer.start();
                     } catch (IOException e) {
@@ -64,12 +60,9 @@ public class StorageActivity extends ListActivity {
                     }
 
                     Toast.makeText(getApplicationContext(), files[position].getName(), Toast.LENGTH_SHORT).show();
-
         });
 
-        listView.setOnItemLongClickListener((AdapterView<?> parent, View view, int position, long id)->
-
-                {
+        listView.setOnItemLongClickListener((AdapterView<?> parent, View view, int position, long id)-> {
                     files[position].delete();
                     startActivity(getIntent());
                     finish();

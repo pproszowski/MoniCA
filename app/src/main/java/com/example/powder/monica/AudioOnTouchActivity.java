@@ -24,7 +24,7 @@ public class AudioOnTouchActivity extends Activity {
     private TouchableButton recordButton;
     private Button ftpButton;
     private Button sendEmailButton;
-    private TextView t;
+    private TextView recordingStatus;
     private TextView sizeText;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
     private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
@@ -43,12 +43,11 @@ public class AudioOnTouchActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_audio_on_touch);
         recorderName = getIntent().getExtras().getString("recorderName");
-
         meetingName = getIntent().getExtras().getString("Name");
         AppLog.logString(meetingName);
 
         recordButton = findViewById(R.id.recordButton);
-        t = findViewById(R.id.textView);
+        recordingStatus = findViewById(R.id.textView);
         sizeText = findViewById(R.id.sizeText);
         ftpButton =findViewById(R.id.ftp);
         sendEmailButton =findViewById(R.id.email);
@@ -109,13 +108,11 @@ public class AudioOnTouchActivity extends Activity {
             }
             });
 
-
-
         recordButton.setOnTouchListener((v, event) -> {
             recordButton.performClick();
             switch(event.getAction()){
                 case MotionEvent.ACTION_DOWN:
-                    t.setText(R.string.recording);
+                    recordingStatus.setText(R.string.recording);
                     AppLog.logString("Start Recording");
                     startRecording();
                     break;
@@ -157,9 +154,11 @@ public class AudioOnTouchActivity extends Activity {
             file.mkdirs();
         }
 
-        return (file.getAbsolutePath() + "/Rec " + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+":"+ Calendar.getInstance().get(Calendar.MINUTE)+":"
-                +Calendar.getInstance().get(Calendar.SECOND)+file_exts[currentFormat]) ;
-
+        return (file.getAbsolutePath() + "/Rec "
+               + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+"꞉"
+               + Calendar.getInstance().get(Calendar.MINUTE)+"꞉"
+               + Calendar.getInstance().get(Calendar.SECOND)
+               + file_exts[currentFormat]);
 
     }
 
@@ -188,14 +187,10 @@ public class AudioOnTouchActivity extends Activity {
 
     private void stopRecording(){
         try {
-
             recorder.stop();
-
-            size+=new File(recordedFileName).length();
-            t.setText(recordedFileName);
+            size += new File(recordedFileName).length();
+            recordingStatus.setText(recordedFileName);
             sizeText.setText(String.format("Size : %sKB", size / 1000));
-
-
 
         }catch (RuntimeException e){
             AppLog.logString("Stopped recording immediately after start");
@@ -204,7 +199,7 @@ public class AudioOnTouchActivity extends Activity {
             if(file.delete()){
                 AppLog.logString(recordedFileName + " has been deleted");
             }
-            t.setText(R.string.record_too_short);
+            recordingStatus.setText(R.string.record_too_short);
         }
 
         if(recorder != null){
