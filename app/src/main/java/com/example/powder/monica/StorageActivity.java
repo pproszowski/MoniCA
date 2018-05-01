@@ -63,7 +63,7 @@ public class StorageActivity extends ListActivity {
         });
 
         listView.setOnItemLongClickListener((AdapterView<?> parent, View view, int position, long id)-> {
-                    files[position].delete();
+                    files[position + 1].delete();
                     startActivity(getIntent());
                     finish();
                     return true;
