@@ -5,8 +5,9 @@ import android.support.v7.widget.AppCompatButton;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.Button;
+import android.widget.ImageButton;
 
-public class TouchableButton extends AppCompatButton {
+public class TouchableButton extends android.support.v7.widget.AppCompatImageButton{
 
     public TouchableButton(Context context) {
         super(context);

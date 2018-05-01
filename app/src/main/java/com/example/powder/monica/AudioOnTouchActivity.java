@@ -56,24 +56,17 @@ public class AudioOnTouchActivity extends Activity {
 
         sendEmailButton.setOnClickListener((view)->{
 
-
             ArrayList<Uri> filesUri = new ArrayList<>();
-
-
             String path = Environment.getExternalStorageDirectory().getPath() +"/"+recorderName+"/"+ meetingName;
             File directory = new File(path);
 
             File[] files = directory.listFiles();
 
             for (File file : files) {
-
                 filesUri.add(Uri.fromFile(file));
-
             }
 
-
             File file = new File (path,"email.txt");
-
 
             Scanner in = null;
             try {
@@ -84,7 +77,6 @@ public class AudioOnTouchActivity extends Activity {
 
 
             List<String> addresses = new ArrayList<>();
-
             if(file.exists()) {
 
                 while(in.hasNext())
