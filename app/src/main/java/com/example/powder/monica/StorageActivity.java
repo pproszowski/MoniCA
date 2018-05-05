@@ -1,15 +1,20 @@
 package com.example.powder.monica;
 
 import android.app.ListActivity;
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.Environment;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.DragEvent;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,30 +51,63 @@ public class StorageActivity extends ListActivity {
         ListView listView = getListView();
         listView.setTextFilterEnabled(true);
 
-        listView.setOnItemClickListener((parent, view, position, id) -> {
-                position++;
-                MediaPlayer mediaPlayer = new MediaPlayer();
-                    try {
-                        mediaPlayer.reset();
-                        String filePath = files[position].getAbsolutePath();
-                        mediaPlayer.setDataSource(filePath);
-                        mediaPlayer.prepare();
-                        mediaPlayer.start();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
 
-                    Toast.makeText(getApplicationContext(), files[position].getName(), Toast.LENGTH_SHORT).show();
-        });
 
-        listView.setOnItemLongClickListener((AdapterView<?> parent, View view, int position, long id)-> {
-                    files[position + 1].delete();
-                    startActivity(getIntent());
-                    finish();
-                    return true;
+
+
+            listView.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext(), listView) {
+
+                @Override
+                public void onClick() {
+                    super.onClick();
+                    int position = getPostion();
+                    position++;
+                    MediaPlayer mediaPlayer = new MediaPlayer();
+                        try {
+                            mediaPlayer.reset();
+                            String filePath = files[position].getAbsolutePath();
+                            mediaPlayer.setDataSource(filePath);
+                            mediaPlayer.prepare();
+                            mediaPlayer.start();
+                            Toast.makeText(getApplicationContext(), "Odtwarzam... " + files[position].getName() ,Toast.LENGTH_LONG).show();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                 }
 
-                );
+                @Override
+                public void onLongClick() {
+                    super.onLongClick();
+                    // tutaj bedzie wyswietlenie mniejszego menu kontekstowego
+                }
+
+
+                @Override
+                public void onSwipeLeft() {
+                    super.onSwipeLeft();
+                        int position = getPostion();
+                        if(files[position + 1].getName().compareTo("email.txt")!=0) {
+                            files[position + 1].delete();
+                            startActivity(getIntent());
+                            finish();
+                            Toast.makeText(getApplicationContext(), "Usunięto " + files[position + 1].getName(), Toast.LENGTH_LONG).show();
+                        }
+                }
+
+                @Override
+                public void onSwipeRight() {
+                    super.onSwipeRight();
+                    // swipe to right
+                }
+            });
+
+
+
+
+
+
+
+
     }
 
 }
