@@ -1,8 +1,11 @@
 package com.example.powder.monica;
 
+import android.annotation.SuppressLint;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,6 +30,7 @@ public class StorageActivity extends ListActivity {
     private String name;
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +102,16 @@ public class StorageActivity extends ListActivity {
                 public void onSwipeRight() {
                     super.onSwipeRight();
                     // swipe to right
+                    ZipManager archive = new ZipManager();
+                    List<String> fileNamesList = new ArrayList<String>();
+                    for(File f : files){
+                        fileNamesList.add(path + f.getName());
+                    }
+                    String [ ] fileNames = fileNamesList.toArray(new String[0]);
+                    archive.zip(fileNames, path+name+".zip");
+
+                    Toast.makeText(getApplicationContext(), "Dodano archiwum zip", Toast.LENGTH_LONG).show();
+                    
                 }
             });
 
