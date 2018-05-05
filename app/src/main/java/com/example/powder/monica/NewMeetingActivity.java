@@ -11,6 +11,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.Calendar;
 import java.util.jar.Attributes;
 
 public class NewMeetingActivity extends AppCompatActivity {
@@ -22,6 +23,7 @@ public class NewMeetingActivity extends AppCompatActivity {
     private PrintWriter writer;
     private TextInputEditText inputEmail;
     private String recorderName;
+    private String mailSubject;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,13 @@ public class NewMeetingActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Nazwa spotkania nie może być pusta!", Toast.LENGTH_SHORT).show();
                         return;
                     }
+                    mailSubject = meetingName.getText() + " "
+                            + Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + "/"
+                            + (Calendar.getInstance().get(Calendar.MONTH)+1) + "/"
+                            + Calendar.getInstance().get(Calendar.YEAR) + " godz. "
+                            + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+"꞉"
+                            + Calendar.getInstance().get(Calendar.MINUTE);
+
                     String path = Environment.getExternalStorageDirectory().getPath()+"/AudioRecorder/"+ meetingName.getText().toString();
                     directory = new File(path);
                     if(!directory.exists()) {
@@ -52,12 +61,14 @@ public class NewMeetingActivity extends AppCompatActivity {
                         System.out.println(e.getMessage());
                     }
                     if(writer !=null) {
+                        writer.println(mailSubject);
                         writer.println(inputEmail.getText().toString());
                         writer.close();
                     }
                     Intent newIntent = new Intent(NewMeetingActivity.this, AudioOnTouchActivity.class);
                     newIntent.putExtra("Name", meetingName.getText().toString());
                     newIntent.putExtra("recorderName", recorderName.toString());
+                    newIntent.putExtra("mailSubject", mailSubject.toString());
                     startActivity(newIntent);
                 }
         );
