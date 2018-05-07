@@ -210,4 +210,9 @@ public class AudioOnTouchActivity extends Activity {
         overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
 
     }
+
+    public void makePhoto(View view) {
+        MakePhoto makePhoto = new MakePhoto(this);
+        makePhoto.dispatchTakePictureIntent();
+    }
 }

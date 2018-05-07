@@ -1,7 +1,10 @@
 package com.example.powder.monica;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Bundle;
 import android.view.View;
@@ -48,6 +51,17 @@ public class StorageActivity extends ListActivity {
 
         listView.setOnItemClickListener((parent, view, position, id) -> {
                 position++;
+
+                File file = files[position];
+                if(file.getName().contains("jpg")){
+                    final Intent intent = new Intent(Intent.ACTION_VIEW)
+                                            .setDataAndType(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
+                                                            android.support.v4.content.FileProvider.getUriForFile(this,
+                                                                    getPackageName() + ".fileprovider", file)
+                                                            : Uri.fromFile(file), "image/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(intent);
+                    return;
+                }
                 MediaPlayer mediaPlayer = new MediaPlayer();
                     try {
                         mediaPlayer.reset();

@@ -76,6 +76,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/photo_button_selector"
             android:background="@android:color/transparent"
+            android:onClick="makePhoto"
             />
 
     </LinearLayout>
