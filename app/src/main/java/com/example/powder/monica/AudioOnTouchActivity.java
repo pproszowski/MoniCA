@@ -36,6 +36,7 @@ public class AudioOnTouchActivity extends Activity {
     private String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
     private String recordedFileName;
     private double size;
+    private String mailSubject;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -44,6 +45,7 @@ public class AudioOnTouchActivity extends Activity {
         setContentView(R.layout.activity_audio_on_touch);
         recorderName = getIntent().getExtras().getString("recorderName");
         meetingName = getIntent().getExtras().getString("Name");
+        mailSubject = getIntent().getExtras().getString("mailSubject");
         AppLog.logString(meetingName);
 
         recordButton = findViewById(R.id.recordButton);
@@ -78,7 +80,7 @@ public class AudioOnTouchActivity extends Activity {
 
             List<String> addresses = new ArrayList<>();
             if(file.exists()) {
-
+                mailSubject = in.nextLine();
                 while(in.hasNext())
                 {
                     addresses.add(in.nextLine());
@@ -89,11 +91,12 @@ public class AudioOnTouchActivity extends Activity {
                     Toast.makeText(getApplicationContext(), "Brak podanych maili!", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
                 String a[] = new String[0];
                 Intent email = new Intent(Intent.ACTION_SEND_MULTIPLE);
                 email.putParcelableArrayListExtra(Intent.EXTRA_STREAM, filesUri);
                 email.putExtra(Intent.EXTRA_EMAIL, addresses.toArray(a));
-                email.putExtra(Intent.EXTRA_SUBJECT, meetingName);
+                email.putExtra(Intent.EXTRA_SUBJECT, mailSubject);
                 email.putExtra(Intent.EXTRA_TEXT, "MoniCA");
                 email.setType("message/rfc822");
                 startActivity(Intent.createChooser(email, "Choose an Email client :"));
