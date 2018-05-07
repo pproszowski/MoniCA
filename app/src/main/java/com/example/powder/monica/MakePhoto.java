@@ -10,6 +10,7 @@ import android.support.v4.content.FileProvider;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 
@@ -31,15 +32,24 @@ public class MakePhoto {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(activity.getPackageManager()) != null) {
             File photoFile = null;
+            File newNameFile = null;
             try {
                 photoFile = createImageFile();
+                String newName = "Img "
+                        + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+"꞉"
+                        + Calendar.getInstance().get(Calendar.MINUTE);
+
+
+                newNameFile = new File(Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName, newName);
+                photoFile.renameTo(newNameFile);
+
             } catch (IOException ex) {
                 // Error occurred while creating the File
             }
-            if (photoFile != null) {
+            if (newNameFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(activity,
                         "com.example.powder.monica.fileprovider",
-                        photoFile);
+                        newNameFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 activity.startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }

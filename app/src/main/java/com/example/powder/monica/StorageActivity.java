@@ -112,7 +112,8 @@ public class StorageActivity extends ListActivity {
                     }
                     String [ ] fileNames = fileNamesList.toArray(new String[0]);
                     archive.zip(fileNames, path+name+".zip");
-
+                    startActivity(getIntent());
+                    finish();
                     Toast.makeText(getApplicationContext(), "Dodano archiwum zip", Toast.LENGTH_LONG).show();
 
                 }
