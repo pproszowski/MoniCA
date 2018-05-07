@@ -6,22 +6,12 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
-import android.content.Context;
-import android.content.Intent;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Environment;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.DragEvent;
-import android.view.View;
-import android.widget.Adapter;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +28,7 @@ public class StorageActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         name = getIntent().getExtras().get("Name").toString();
         overridePendingTransition(0, 0);
         String path = Environment.getExternalStorageDirectory().getPath()+"/AudioRecorder/"+getIntent().getExtras().get("Name").toString()+"/";
@@ -55,7 +46,7 @@ public class StorageActivity extends ListActivity {
 
         System.out.println(size/1000);
 
-        setListAdapter(new ArrayAdapter<>(this, R.layout.activity_storage,filesNames));
+        setListAdapter(new StorageArrayAdapter(this, filesNames.toArray(new String[0])));
         ListView listView = getListView();
         listView.setTextFilterEnabled(true);
 
@@ -126,14 +117,5 @@ public class StorageActivity extends ListActivity {
 
                 }
             });
-
-
-
-
-
-
-
-
     }
-
 }
