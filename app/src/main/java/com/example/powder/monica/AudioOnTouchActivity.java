@@ -1,4 +1,5 @@
 package com.example.powder.monica;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.util.Scanner;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import android.os.Environment;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,14 +31,19 @@ public class AudioOnTouchActivity extends Activity {
     private TextView recordingStatus;
     private TextView sizeText;
     private TextView sizeOfSelectedItemsText;
+    private TextView willNotText;
+    private TextView couldText;
+    private TextView shouldText;
+    private TextView mustText;
+    private SeekBar priorityBar;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
     private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
     private String recorderName;
     private String meetingName = "";
     private MediaRecorder recorder = null;
     private int currentFormat = 0;
-    private static final int output_formats[] = { MediaRecorder.OutputFormat.DEFAULT, MediaRecorder.OutputFormat.THREE_GPP };
-    private static final String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
+    private static final int output_formats[] = {MediaRecorder.OutputFormat.DEFAULT, MediaRecorder.OutputFormat.THREE_GPP};
+    private static final String file_exts[] = {AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP};
     private String recordedFileName;
     private double size;
     private String mailSubject;
@@ -53,26 +61,34 @@ public class AudioOnTouchActivity extends Activity {
         recordButton = findViewById(R.id.recordButton);
         recordingStatus = findViewById(R.id.textView);
         sizeText = findViewById(R.id.sizeText);
+        willNotText = findViewById(R.id.willNotText);
+        couldText = findViewById(R.id.couldText);
+        shouldText = findViewById(R.id.shouldText);
+        mustText = findViewById(R.id.mustText);
+        priorityBar = findViewById(R.id.priorityBar);
         Button ftpButton = findViewById(R.id.ftp);
         Button sendEmailButton = findViewById(R.id.email);
         sizeOfSelectedItemsText = findViewById(R.id.sizeOfSelectedItemsText);
-        ftpButton.setOnClickListener((view)-> new FTP(recorderName, meetingName).execute());
+        ftpButton.setOnClickListener((view) -> new FTP(recorderName, meetingName).execute());
 
-        sendEmailButton.setOnClickListener((view)->{
+        willNotText.setTypeface(null, Typeface.BOLD);
+        willNotText.setTextSize(16);
+
+        sendEmailButton.setOnClickListener((view) -> {
 
             ArrayList<Uri> filesUri = new ArrayList<>();
-            String path = Environment.getExternalStorageDirectory().getPath() +"/"+recorderName+"/"+ meetingName;
+            String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
             File directory = new File(path);
 
             File[] files = directory.listFiles();
 
             for (File file : files) {
-                if(checkedFileNames.contains(file.getName())){
+                if (checkedFileNames.contains(file.getName())) {
                     filesUri.add(Uri.fromFile(file));
                 }
             }
 
-            File file = new File (path,"email.txt");
+            File file = new File(path, "email.txt");
 
             Scanner in = null;
             try {
@@ -83,15 +99,14 @@ public class AudioOnTouchActivity extends Activity {
 
 
             List<String> addresses = new ArrayList<>();
-            if(file.exists()) {
+            if (file.exists()) {
                 mailSubject = in.nextLine();
-                while(in.hasNext())
-                {
+                while (in.hasNext()) {
                     addresses.add(in.nextLine());
                 }
 
 
-                if(addresses.isEmpty()){
+                if (addresses.isEmpty()) {
                     Toast.makeText(getApplicationContext(), "Brak podanych maili!", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -105,11 +120,11 @@ public class AudioOnTouchActivity extends Activity {
                 email.setType("message/rfc822");
                 startActivity(Intent.createChooser(email, "Choose an Email client :"));
             }
-            });
+        });
 
         recordButton.setOnTouchListener((v, event) -> {
             recordButton.performClick();
-            switch(event.getAction()){
+            switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     recordingStatus.setText(R.string.recording);
                     AppLog.logString("Start Recording");
@@ -122,29 +137,50 @@ public class AudioOnTouchActivity extends Activity {
             }
             return false;
         });
+
+        priorityBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+                // TODO Auto-generated method stub
+                setPriority(progress);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     protected void onResume() {
         super.onResume();
 
-        String path = Environment.getExternalStorageDirectory().getPath() +"/"+recorderName+"/"+ meetingName;
+        String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
 
 
         size = 0;
         double sizeOfSelectedFiles = 0;
         File directory = new File(path);
 
-        if(!directory.exists()){
+        if (!directory.exists()) {
             directory.mkdirs();
         }
 
         File[] files = directory.listFiles();
 
         for (File file : files) {
-            if(checkedFileNames.contains(file.getName())){
+            if (checkedFileNames.contains(file.getName())) {
                 sizeOfSelectedFiles += file.length();
             }
-            if(!"email.txt".equals(file.getName())){
+            if (!"email.txt".equals(file.getName())) {
                 size += file.length();
             }
         }
@@ -152,23 +188,23 @@ public class AudioOnTouchActivity extends Activity {
         sizeOfSelectedItemsText.setText(String.format("Selected files size : %sKB", sizeOfSelectedFiles / 1000));
     }
 
-    private String getFilename(){
+    private String getFilename() {
         String filepath = Environment.getExternalStorageDirectory().getPath();
-        File file = new File(filepath,recorderName+"/"+ meetingName);
+        File file = new File(filepath, recorderName + "/" + meetingName);
 
-        if(!file.exists()){
+        if (!file.exists()) {
             file.mkdirs();
         }
 
         return (file.getAbsolutePath() + "/Rec "
-               + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+"꞉"
-               + Calendar.getInstance().get(Calendar.MINUTE)+"꞉"
-               + Calendar.getInstance().get(Calendar.SECOND)
-               + file_exts[currentFormat]);
+                + Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "꞉"
+                + Calendar.getInstance().get(Calendar.MINUTE) + "꞉"
+                + Calendar.getInstance().get(Calendar.SECOND)
+                + file_exts[currentFormat]);
 
     }
 
-    private void startRecording(){
+    private void startRecording() {
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(output_formats[currentFormat]);
@@ -191,17 +227,17 @@ public class AudioOnTouchActivity extends Activity {
 
     private MediaRecorder.OnInfoListener infoListener = (mr, what, extra) -> AppLog.logString("Warning: " + what + ", " + extra);
 
-    private void stopRecording(){
+    private void stopRecording() {
         try {
             recorder.stop();
             size += new File(recordedFileName).length();
             recordingStatus.setText(recordedFileName);
             sizeText.setText(String.format("Size : %sKB", size / 1000));
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             recordingStatus.setText(R.string.record_too_short);
         }
 
-        if(recorder != null){
+        if (recorder != null) {
             recorder.reset();
             recorder.release();
 
@@ -213,7 +249,7 @@ public class AudioOnTouchActivity extends Activity {
     public void goToStorage(View view) {
         Intent intent = new Intent(this, StorageActivity.class);
         intent.putExtra("Name", meetingName);
-        if(checkedFileNames != null && !checkedFileNames.isEmpty()){
+        if (checkedFileNames != null && !checkedFileNames.isEmpty()) {
             intent.putStringArrayListExtra("checkedFileNames", (ArrayList<String>) checkedFileNames);
         }
         startActivityForResult(intent, GET_CHECKED_FILE_NAMES);
@@ -222,12 +258,12 @@ public class AudioOnTouchActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == GET_CHECKED_FILE_NAMES){
-            if( resultCode == RESULT_OK){
-                if(data != null){
+        if (requestCode == GET_CHECKED_FILE_NAMES) {
+            if (resultCode == RESULT_OK) {
+                if (data != null) {
                     try {
                         checkedFileNames = data.getStringArrayListExtra("checkedFileNames");
-                    }catch (RuntimeException e){
+                    } catch (RuntimeException e) {
                         e.printStackTrace();
                     }
                 }
@@ -238,5 +274,60 @@ public class AudioOnTouchActivity extends Activity {
     public void makePhoto(View view) {
         MakePhoto makePhoto = new MakePhoto(this);
         makePhoto.dispatchTakePictureIntent();
+    }
+
+    public void setPriority(int progress) {
+        switch (progress) {
+            case 0:
+                willNotText.setTypeface(null, Typeface.BOLD);
+                couldText.setTypeface(null, Typeface.NORMAL);
+                shouldText.setTypeface(null, Typeface.NORMAL);
+                mustText.setTypeface(null, Typeface.NORMAL);
+
+                willNotText.setTextSize(16);
+                couldText.setTextSize(14);
+                shouldText.setTextSize(14);
+                mustText.setTextSize(14);
+                break;
+
+            case 1:
+                willNotText.setTypeface(null, Typeface.NORMAL);
+                couldText.setTypeface(null, Typeface.BOLD);
+                shouldText.setTypeface(null, Typeface.NORMAL);
+                mustText.setTypeface(null, Typeface.NORMAL);
+
+                willNotText.setTextSize(14);
+                couldText.setTextSize(16);
+                shouldText.setTextSize(14);
+                mustText.setTextSize(14);
+                break;
+
+            case 2:
+                willNotText.setTypeface(null, Typeface.NORMAL);
+                couldText.setTypeface(null, Typeface.NORMAL);
+                shouldText.setTypeface(null, Typeface.BOLD);
+                mustText.setTypeface(null, Typeface.NORMAL);
+
+                willNotText.setTextSize(14);
+                couldText.setTextSize(14);
+                shouldText.setTextSize(16);
+                mustText.setTextSize(14);
+                break;
+
+            case 3:
+                willNotText.setTypeface(null, Typeface.NORMAL);
+                couldText.setTypeface(null, Typeface.NORMAL);
+                shouldText.setTypeface(null, Typeface.NORMAL);
+                mustText.setTypeface(null, Typeface.BOLD);
+
+                willNotText.setTextSize(14);
+                couldText.setTextSize(14);
+                shouldText.setTextSize(14);
+                mustText.setTextSize(16);
+                break;
+
+            default:
+                break;
+        }
     }
 }
