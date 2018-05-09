@@ -23,7 +23,7 @@ public class TouchableButton extends android.support.v7.widget.AppCompatImageBut
 
     @Override
     public boolean performClick() {
-       return true;
+       return super.performClick();
     }
 
 

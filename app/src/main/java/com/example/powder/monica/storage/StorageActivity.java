@@ -2,6 +2,7 @@ package com.example.powder.monica.storage;
 
 import android.annotation.SuppressLint;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -31,10 +32,10 @@ public class StorageActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        name = getIntent().getExtras().getString("Name");
-
         overridePendingTransition(0, 0);
-        String path = Environment.getExternalStorageDirectory().getPath()+"/AudioRecorder/"+getIntent().getExtras().getString("Name") + "/";
+        name = getIntent().getExtras().getString("Name");
+        String path = Environment.getExternalStorageDirectory().getPath()
+                + "/AudioRecorder/" + name + "/";
         File directory = new File(path);
         files = directory.listFiles();
 
@@ -59,43 +60,23 @@ public class StorageActivity extends ListActivity {
         ListView listView = getListView();
         listView.setTextFilterEnabled(true);
 
-
-
             listView.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext(), listView) {
 
                 @Override
                 public void onClick() {
                     super.onClick();
-
-                    int position = getPosition();
-                    position++;
+                    int position = getPosition() + 1;
                     File file = files[position];
                     if(file.getName().contains("jpg")){
-                        final Intent intent = new Intent(Intent.ACTION_VIEW)
-                                .setDataAndType(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
-                                        android.support.v4.content.FileProvider.getUriForFile(listView.getContext(),
-                                                getPackageName() + ".fileprovider", file)
-                                        : Uri.fromFile(file), "image/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        startActivity(intent);
-                        return;
+                        openImage(file, listView.getContext());
+                    }else{
+                        openAudio(file);
                     }
-                    MediaPlayer mediaPlayer = new MediaPlayer();
-                        try {
-                            mediaPlayer.reset();
-                            String filePath = file.getAbsolutePath();
-                            mediaPlayer.setDataSource(filePath);
-                            mediaPlayer.prepare();
-                            mediaPlayer.start();
-                            Toast.makeText(getApplicationContext(), "Odtwarzam... " + file.getName() ,Toast.LENGTH_LONG).show();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
                 }
 
                 @Override
                 public void onLongClick() {
                     super.onLongClick();
-                    // tutaj bedzie wyswietlenie mniejszego menu kontekstowego
                 }
 
 
@@ -105,15 +86,9 @@ public class StorageActivity extends ListActivity {
                     if(files.length < 2){
                         return;
                     }
-                    int position = getPosition();
-                    File file = files[position + 1];
-                    FileItem fileItem =findFileItemInTheSetByName(file.getName());
-                    if(fileItem != null){
-                        fileItems.remove(fileItem);
-                    }
-                    file.delete();
-                    startActivity(getIntent());
-                    finish();
+                    int position = getPosition() + 1;
+                    File file = files[position];
+                    deleteItem(file);
                     Toast.makeText(getApplicationContext(), "Usunięto " + file.getName(), Toast.LENGTH_LONG).show();
             }
 
@@ -124,20 +99,55 @@ public class StorageActivity extends ListActivity {
                         Toast.makeText(getApplicationContext(), "Brak plików w folderze." , Toast.LENGTH_LONG).show();
                         return;
                     }
-                    // swipe to right
-                    ZipManager archive = new ZipManager();
-                    List<String> fileNamesList = new ArrayList<>();
-                    for(File f : files){
-                        fileNamesList.add(path + f.getName());
-                    }
-                    String [ ] fileNames = fileNamesList.toArray(new String[0]);
-                    archive.zip(fileNames, path+name+".zip");
-                    startActivity(getIntent());
-                    finish();
+                    addArchive(files, path);
                     Toast.makeText(getApplicationContext(), "Dodano archiwum zip", Toast.LENGTH_LONG).show();
-
                 }
             });
+    }
+
+    private void openImage(File file, Context context) {
+        final Intent intent = new Intent(Intent.ACTION_VIEW)
+                .setDataAndType(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
+                        android.support.v4.content.FileProvider.getUriForFile(context,
+                                getPackageName() + ".fileprovider", file)
+                        : Uri.fromFile(file), "image/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(intent);
+    }
+
+    private void openAudio(File file) {
+        MediaPlayer mediaPlayer = new MediaPlayer();
+        try {
+            mediaPlayer.reset();
+            String filePath = file.getAbsolutePath();
+            mediaPlayer.setDataSource(filePath);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+            Toast.makeText(getApplicationContext(), "Odtwarzam... " + file.getName() ,Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deleteItem(File file) {
+        FileItem fileItem =findFileItemInTheSetByName(file.getName());
+        if(fileItem != null){
+            fileItems.remove(fileItem);
+        }
+        file.delete();
+        startActivity(getIntent());
+        finish();
+    }
+
+    private void addArchive(File[] files, String path) {
+        ZipManager archive = new ZipManager();
+        List<String> fileNamesList = new ArrayList<>();
+        for(File f : files){
+            fileNamesList.add(path + f.getName());
+        }
+        String [ ] fileNames = fileNamesList.toArray(new String[0]);
+        archive.zip(fileNames, path+name+".zip");
+        startActivity(getIntent());
+        finish();
     }
 
     private void selectCheckBoxes(List<String> checkedFileNames) {

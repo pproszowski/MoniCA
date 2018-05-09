@@ -25,8 +25,6 @@ import com.example.powder.monica.storage.StorageActivity;
 
 public class AudioOnTouchActivity extends Activity {
     private TouchableButton recordButton;
-    private Button ftpButton;
-    private Button sendEmailButton;
     private TextView recordingStatus;
     private TextView sizeText;
     private TextView sizeOfSelectedItemsText;
@@ -39,7 +37,7 @@ public class AudioOnTouchActivity extends Activity {
     private static final int output_formats[] = { MediaRecorder.OutputFormat.DEFAULT, MediaRecorder.OutputFormat.THREE_GPP };
     private static final String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
     private String recordedFileName;
-    private double size, sizeOfSelectedFiles;
+    private double size;
     private String mailSubject;
     private List<String> checkedFileNames = new ArrayList<>();
     private static final int GET_CHECKED_FILE_NAMES = 1;
@@ -55,10 +53,11 @@ public class AudioOnTouchActivity extends Activity {
         recordButton = findViewById(R.id.recordButton);
         recordingStatus = findViewById(R.id.textView);
         sizeText = findViewById(R.id.sizeText);
-        ftpButton =findViewById(R.id.ftp);
-        sendEmailButton =findViewById(R.id.email);
+        Button ftpButton = findViewById(R.id.ftp);
+        Button sendEmailButton = findViewById(R.id.email);
         sizeOfSelectedItemsText = findViewById(R.id.sizeOfSelectedItemsText);
         ftpButton.setOnClickListener((view)-> new FTP(recorderName, meetingName).execute());
+
         sendEmailButton.setOnClickListener((view)->{
 
             ArrayList<Uri> filesUri = new ArrayList<>();
@@ -132,7 +131,7 @@ public class AudioOnTouchActivity extends Activity {
 
 
         size = 0;
-        sizeOfSelectedFiles = 0;
+        double sizeOfSelectedFiles = 0;
         File directory = new File(path);
 
         if(!directory.exists()){
