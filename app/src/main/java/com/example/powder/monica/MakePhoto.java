@@ -37,7 +37,8 @@ public class MakePhoto {
                 photoFile = createImageFile();
                 String newName = "Img "
                         + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+"꞉"
-                        + Calendar.getInstance().get(Calendar.MINUTE) + ".jpg";
+                        + Calendar.getInstance().get(Calendar.MINUTE) +"꞉"
+                        + Calendar.getInstance().get(Calendar.SECOND) + ".jpg";
 
 
                 newNameFile = new File(Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName, newName);

@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Scanner;
@@ -20,23 +21,28 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.powder.monica.storage.StorageActivity;
+
 public class AudioOnTouchActivity extends Activity {
     private TouchableButton recordButton;
     private Button ftpButton;
     private Button sendEmailButton;
     private TextView recordingStatus;
     private TextView sizeText;
+    private TextView sizeOfSelectedItemsText;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
     private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
     private String recorderName;
     private String meetingName = "";
     private MediaRecorder recorder = null;
     private int currentFormat = 0;
-    private int output_formats[] = { MediaRecorder.OutputFormat.DEFAULT, MediaRecorder.OutputFormat.THREE_GPP };
-    private String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
+    private static final int output_formats[] = { MediaRecorder.OutputFormat.DEFAULT, MediaRecorder.OutputFormat.THREE_GPP };
+    private static final String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
     private String recordedFileName;
-    private double size;
+    private double size, sizeOfSelectedFiles;
     private String mailSubject;
+    private List<String> checkedFileNames = new ArrayList<>();
+    private static final int GET_CHECKED_FILE_NAMES = 1;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -46,16 +52,13 @@ public class AudioOnTouchActivity extends Activity {
         recorderName = getIntent().getExtras().getString("recorderName");
         meetingName = getIntent().getExtras().getString("Name");
         mailSubject = getIntent().getExtras().getString("mailSubject");
-        AppLog.logString(meetingName);
-
         recordButton = findViewById(R.id.recordButton);
         recordingStatus = findViewById(R.id.textView);
         sizeText = findViewById(R.id.sizeText);
         ftpButton =findViewById(R.id.ftp);
         sendEmailButton =findViewById(R.id.email);
-
+        sizeOfSelectedItemsText = findViewById(R.id.sizeOfSelectedItemsText);
         ftpButton.setOnClickListener((view)-> new FTP(recorderName, meetingName).execute());
-
         sendEmailButton.setOnClickListener((view)->{
 
             ArrayList<Uri> filesUri = new ArrayList<>();
@@ -65,7 +68,9 @@ public class AudioOnTouchActivity extends Activity {
             File[] files = directory.listFiles();
 
             for (File file : files) {
-                filesUri.add(Uri.fromFile(file));
+                if(checkedFileNames.contains(file.getName())){
+                    filesUri.add(Uri.fromFile(file));
+                }
             }
 
             File file = new File (path,"email.txt");
@@ -127,6 +132,7 @@ public class AudioOnTouchActivity extends Activity {
 
 
         size = 0;
+        sizeOfSelectedFiles = 0;
         File directory = new File(path);
 
         if(!directory.exists()){
@@ -136,9 +142,15 @@ public class AudioOnTouchActivity extends Activity {
         File[] files = directory.listFiles();
 
         for (File file : files) {
-            size += file.length();
+            if(checkedFileNames.contains(file.getName())){
+                sizeOfSelectedFiles += file.length();
+            }
+            if(!"email.txt".equals(file.getName())){
+                size += file.length();
+            }
         }
         sizeText.setText(String.format("Size : %sKB", size / 1000));
+        sizeOfSelectedItemsText.setText(String.format("Selected files size : %sKB", sizeOfSelectedFiles / 1000));
     }
 
     private String getFilename(){
@@ -186,14 +198,7 @@ public class AudioOnTouchActivity extends Activity {
             size += new File(recordedFileName).length();
             recordingStatus.setText(recordedFileName);
             sizeText.setText(String.format("Size : %sKB", size / 1000));
-
         }catch (RuntimeException e){
-            AppLog.logString("Stopped recording immediately after start");
-            AppLog.logString(recordedFileName + " should be deleted");
-            File file = new File(recordedFileName);
-            if(file.delete()){
-                AppLog.logString(recordedFileName + " has been deleted");
-            }
             recordingStatus.setText(R.string.record_too_short);
         }
 
@@ -205,13 +210,30 @@ public class AudioOnTouchActivity extends Activity {
         }
     }
 
-    public void goToStorage(View view) {
 
+    public void goToStorage(View view) {
         Intent intent = new Intent(this, StorageActivity.class);
         intent.putExtra("Name", meetingName);
-        startActivity(intent);
+        if(checkedFileNames != null && !checkedFileNames.isEmpty()){
+            intent.putStringArrayListExtra("checkedFileNames", (ArrayList<String>) checkedFileNames);
+        }
+        startActivityForResult(intent, GET_CHECKED_FILE_NAMES);
         overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == GET_CHECKED_FILE_NAMES){
+            if( resultCode == RESULT_OK){
+                if(data != null){
+                    try {
+                        checkedFileNames = data.getStringArrayListExtra("checkedFileNames");
+                    }catch (RuntimeException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
 
     public void makePhoto(View view) {

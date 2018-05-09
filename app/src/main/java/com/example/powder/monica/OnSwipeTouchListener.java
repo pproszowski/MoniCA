@@ -19,7 +19,7 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
         this.listView = listView;
     }
 
-    public int getPostion () {return position;}
+    public int getPosition() {return position;}
 
     public boolean onTouch(final View view, final MotionEvent motionEvent) {
         return gestureDetector.onTouchEvent(motionEvent);
@@ -57,9 +57,9 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
         // Determines the fling velocity and then fires the appropriate swipe event accordingly
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            position = listView.pointToPosition((int) e1.getX(), (int) e1.getY());
             boolean result = false;
             try {
+                position = listView.pointToPosition((int) e1.getX(), (int) e1.getY());
                 float diffY = e2.getY() - e1.getY();
                 float diffX = e2.getX() - e1.getX();
                 if (Math.abs(diffX) > Math.abs(diffY)) {
