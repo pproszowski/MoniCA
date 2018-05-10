@@ -65,12 +65,14 @@ public class StorageActivity extends ListActivity {
                 @Override
                 public void onClick() {
                     super.onClick();
-                    int position = getPosition() + 1;
-                    File file = files[position];
-                    if(file.getName().contains("jpg")){
-                        openImage(file, listView.getContext());
-                    }else{
-                        openAudio(file);
+                    if (getPosition() != -1) {
+                        int position = getPosition() + 1;
+                        File file = files[position];
+                        if (file.getName().contains("jpg")) {
+                            openImage(file, listView.getContext());
+                        } else {
+                            openAudio(file);
+                        }
                     }
                 }
 
@@ -86,10 +88,12 @@ public class StorageActivity extends ListActivity {
                     if(files.length < 2){
                         return;
                     }
-                    int position = getPosition() + 1;
-                    File file = files[position];
-                    deleteItem(file);
-                    Toast.makeText(getApplicationContext(), "Usunięto " + file.getName(), Toast.LENGTH_LONG).show();
+                    if (getPosition() != -1) {
+                        int position = getPosition() + 1;
+                        File file = files[position];
+                        deleteItem(file);
+                        Toast.makeText(getApplicationContext(), "Usunięto " + file.getName(), Toast.LENGTH_LONG).show();
+                    }
             }
 
                 @Override

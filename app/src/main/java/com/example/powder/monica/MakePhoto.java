@@ -34,7 +34,9 @@ public class MakePhoto extends Activity {
     static final int REQUEST_TAKE_PHOTO = 1;
     private String recorderName;
     private String meetingName;
+
     private File newNameFile = null;
+    private String choosenPriority;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +44,7 @@ public class MakePhoto extends Activity {
         recorderName = getIntent().getExtras().getString("recorderName");
         meetingName = getIntent().getExtras().getString("Name");
         dispatchTakePictureIntent();
+
     }
 
 
@@ -56,9 +59,10 @@ public class MakePhoto extends Activity {
 
             try {
                 photoFile = createImageFile();
-                String newName = "Img "
-                        + Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "꞉"
-                        + Calendar.getInstance().get(Calendar.MINUTE) + "꞉"
+
+                String newName = choosenPriority + "Img "
+                        + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+"꞉"
+                        + Calendar.getInstance().get(Calendar.MINUTE) +"꞉"
                         + Calendar.getInstance().get(Calendar.SECOND) + ".jpg";
 
 
