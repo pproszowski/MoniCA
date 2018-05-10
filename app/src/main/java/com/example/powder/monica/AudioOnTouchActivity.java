@@ -17,6 +17,7 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.powder.monica.storage.StorageActivity;
+
 
 public class AudioOnTouchActivity extends Activity {
     private TouchableButton recordButton;
@@ -49,6 +51,7 @@ public class AudioOnTouchActivity extends Activity {
     private String mailSubject;
     private List<String> checkedFileNames = new ArrayList<>();
     private static final int GET_CHECKED_FILE_NAMES = 1;
+    private static final int REQUEST_TAKE_PHOTO = 2;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -258,7 +261,8 @@ public class AudioOnTouchActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == GET_CHECKED_FILE_NAMES) {
+
+            if (requestCode == GET_CHECKED_FILE_NAMES) {
             if (resultCode == RESULT_OK) {
                 if (data != null) {
                     try {
@@ -268,12 +272,30 @@ public class AudioOnTouchActivity extends Activity {
                     }
                 }
             }
+
+
+            }
+        if(requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK ){
+            Log.i("^^^^^^^^^^^^^^^^^^^^^", "^^^^^^^^^wykonano");
         }
+
+
     }
 
     public void makePhoto(View view) {
-        MakePhoto makePhoto = new MakePhoto(this);
-        makePhoto.dispatchTakePictureIntent();
+        //MakePhoto makePhoto = new MakePhoto(this);
+        //makePhoto.dispatchTakePictureIntent();
+        Intent photoIntent = new Intent(this, MakePhoto.class);
+        photoIntent.putExtra("Name", meetingName);
+        photoIntent.putExtra("recorderName", recorderName);
+        startActivityForResult(photoIntent, REQUEST_TAKE_PHOTO);
+
+
+//        try {
+//            makePhoto.compressImage(makePhoto.getPictureFile());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public void setPriority(int progress) {
