@@ -34,13 +34,12 @@ public class MakePhoto extends Activity {
     static final int REQUEST_TAKE_PHOTO = 1;
     private String recorderName;
     private String meetingName;
-
-    private File newNameFile = null;
     private String choosenPriority;
+    private File newNameFile = null;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        choosenPriority = getIntent().getExtras().getString("choosenPriority");
         recorderName = getIntent().getExtras().getString("recorderName");
         meetingName = getIntent().getExtras().getString("Name");
         dispatchTakePictureIntent();

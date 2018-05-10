@@ -289,6 +289,7 @@ public class AudioOnTouchActivity extends Activity {
         Intent photoIntent = new Intent(this, MakePhoto.class);
         photoIntent.putExtra("Name", meetingName);
         photoIntent.putExtra("recorderName", recorderName);
+        photoIntent.putExtra("choosenPriority", choosenPriority);
         startActivityForResult(photoIntent, REQUEST_TAKE_PHOTO);
 
     }
