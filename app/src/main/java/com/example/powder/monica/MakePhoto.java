@@ -21,11 +21,13 @@ public class MakePhoto {
     static final int REQUEST_TAKE_PHOTO = 1;
     private String recorderName;
     private String meetingName;
+    private String choosenPriority;
 
-    public MakePhoto(Activity activity){
+    public MakePhoto(Activity activity, String choosenPriority){
         this.activity = activity;
         recorderName = activity.getIntent().getExtras().getString("recorderName");
         meetingName = activity.getIntent().getExtras().getString("Name");
+        this.choosenPriority = choosenPriority;
     }
 
     public void dispatchTakePictureIntent() {
@@ -35,7 +37,7 @@ public class MakePhoto {
             File newNameFile = null;
             try {
                 photoFile = createImageFile();
-                String newName = "Img "
+                String newName = choosenPriority + "Img "
                         + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+"꞉"
                         + Calendar.getInstance().get(Calendar.MINUTE) +"꞉"
                         + Calendar.getInstance().get(Calendar.SECOND) + ".jpg";

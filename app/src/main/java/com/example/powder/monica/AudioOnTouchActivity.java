@@ -49,6 +49,7 @@ public class AudioOnTouchActivity extends Activity {
     private String mailSubject;
     private List<String> checkedFileNames = new ArrayList<>();
     private static final int GET_CHECKED_FILE_NAMES = 1;
+    private String choosenPriority = "WillNot_";
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -196,7 +197,7 @@ public class AudioOnTouchActivity extends Activity {
             file.mkdirs();
         }
 
-        return (file.getAbsolutePath() + "/Rec "
+        return (file.getAbsolutePath() + "/" + choosenPriority + "Rec "
                 + Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "꞉"
                 + Calendar.getInstance().get(Calendar.MINUTE) + "꞉"
                 + Calendar.getInstance().get(Calendar.SECOND)
@@ -230,7 +231,7 @@ public class AudioOnTouchActivity extends Activity {
     private void stopRecording() {
         try {
             recorder.stop();
-            size += new File(recordedFileName).length();
+            size += new File(choosenPriority + recordedFileName).length();
             recordingStatus.setText(recordedFileName);
             sizeText.setText(String.format("Size : %sKB", size / 1000));
         } catch (RuntimeException e) {
@@ -272,13 +273,14 @@ public class AudioOnTouchActivity extends Activity {
     }
 
     public void makePhoto(View view) {
-        MakePhoto makePhoto = new MakePhoto(this);
+        MakePhoto makePhoto = new MakePhoto(this, choosenPriority);
         makePhoto.dispatchTakePictureIntent();
     }
 
     public void setPriority(int progress) {
         switch (progress) {
             case 0:
+                choosenPriority = "WillNot_";
                 willNotText.setTypeface(null, Typeface.BOLD);
                 couldText.setTypeface(null, Typeface.NORMAL);
                 shouldText.setTypeface(null, Typeface.NORMAL);
@@ -291,6 +293,7 @@ public class AudioOnTouchActivity extends Activity {
                 break;
 
             case 1:
+                choosenPriority = "Could_";
                 willNotText.setTypeface(null, Typeface.NORMAL);
                 couldText.setTypeface(null, Typeface.BOLD);
                 shouldText.setTypeface(null, Typeface.NORMAL);
@@ -303,6 +306,7 @@ public class AudioOnTouchActivity extends Activity {
                 break;
 
             case 2:
+                choosenPriority = "Sould_";
                 willNotText.setTypeface(null, Typeface.NORMAL);
                 couldText.setTypeface(null, Typeface.NORMAL);
                 shouldText.setTypeface(null, Typeface.BOLD);
@@ -315,6 +319,7 @@ public class AudioOnTouchActivity extends Activity {
                 break;
 
             case 3:
+                choosenPriority = "Must_";
                 willNotText.setTypeface(null, Typeface.NORMAL);
                 couldText.setTypeface(null, Typeface.NORMAL);
                 shouldText.setTypeface(null, Typeface.NORMAL);
