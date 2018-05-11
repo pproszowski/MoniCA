@@ -55,6 +55,13 @@ public class AudioOnTouchActivity extends Activity {
     private String choosenPriority = "WillNot_";
     private String path;
     private double sizeSelectedItems;
+    private final String emailContent = "\nLegenda do notatek:\n" +
+            "Notatki zaczynają się prefixami, które świadczą o ważności informacji\n" +
+            "1) Must - oznacza krytyczne wymaganie, które musi zostać spełnione na początku, aby projekt mógł się powieść\n" +
+            "2) Should -  wymaganie istotne dla powodzenia projektu, jednak nie są konieczne w aktualnej fazie cyklu projektu\n" +
+            "3) Could - wymaganie mniej krytyczne i często są postrzegane jako takie, które dobrze żeby były. " +
+            "Kilka takich spełnionych wymagań w projekcie może zwiększyć zadowolenie klienta przy równoczesnym niskim koszcie ich dostarczenia.\n" +
+            "4) Will not - informację, które w chwilii obecnej nie są wymagane, ale mogą się stać np. w kolejnym cyklu projektu";
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -124,7 +131,7 @@ public class AudioOnTouchActivity extends Activity {
                     email.putParcelableArrayListExtra(Intent.EXTRA_STREAM, filesUri);
                     email.putExtra(Intent.EXTRA_EMAIL, addresses.toArray(a));
                     email.putExtra(Intent.EXTRA_SUBJECT, mailSubject);
-                    email.putExtra(Intent.EXTRA_TEXT, "MoniCA");
+                    email.putExtra(Intent.EXTRA_TEXT, emailContent);
                     email.setType("message/rfc822");
                     startActivity(Intent.createChooser(email, "Choose an Email client :"));
                 }
