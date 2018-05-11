@@ -51,7 +51,7 @@ public class AudioOnTouchActivity extends Activity {
     private List<String> checkedFileNames = new ArrayList<>();
     private static final int GET_CHECKED_FILE_NAMES = 1;
     private static final int REQUEST_TAKE_PHOTO = 2;
-    private String choosenPriority = "WillNot_";
+    private String choosenPriority = "WillNot ";
     private String path;
     private double sizeSelectedItems;
     private final String emailContent = "\nLegenda do notatek:\n" +
@@ -306,7 +306,7 @@ public class AudioOnTouchActivity extends Activity {
                 break;
 
             case 1:
-                if(Objects.equals("WillNot", choosenPriority)){
+                if(Objects.equals("WillNot ", choosenPriority)){
                     setChosenPriority(couldText, willNotText);
                 }else{
                     setChosenPriority(couldText, shouldText);
@@ -315,7 +315,7 @@ public class AudioOnTouchActivity extends Activity {
                 break;
 
             case 2:
-                if(Objects.equals("Could", choosenPriority)){
+                if(Objects.equals("Could ", choosenPriority)){
                     setChosenPriority(shouldText, couldText);
                 }else{
                     setChosenPriority(shouldText, mustText);
@@ -325,17 +325,18 @@ public class AudioOnTouchActivity extends Activity {
 
             case 3:
                 setChosenPriority(mustText, shouldText);
+                choosenPriority = "Must ";
                 break;
             default:
                 break;
         }
     }
 
-    private void setChosenPriority(TextView choosenPriority, TextView previous){
-        choosenPriority.setTypeface(null, Typeface.BOLD);
+    private void setChosenPriority(TextView chosenPriority, TextView previous){
+        chosenPriority.setTypeface(null, Typeface.BOLD);
         previous.setTypeface(null, Typeface.NORMAL);
 
-        choosenPriority.setTextSize(16);
+        chosenPriority.setTextSize(16);
         previous.setTextSize(14);
     }
 
