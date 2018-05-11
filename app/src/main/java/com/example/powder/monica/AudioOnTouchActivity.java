@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 import android.annotation.SuppressLint;
@@ -17,7 +17,6 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -38,7 +37,6 @@ public class AudioOnTouchActivity extends Activity {
     private TextView couldText;
     private TextView shouldText;
     private TextView mustText;
-    private SeekBar priorityBar;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
     private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
     private String recorderName;
@@ -79,7 +77,7 @@ public class AudioOnTouchActivity extends Activity {
         couldText = findViewById(R.id.couldText);
         shouldText = findViewById(R.id.shouldText);
         mustText = findViewById(R.id.mustText);
-        priorityBar = findViewById(R.id.priorityBar);
+        SeekBar priorityBar = findViewById(R.id.priorityBar);
         Button ftpButton = findViewById(R.id.ftp);
         Button sendEmailButton = findViewById(R.id.email);
         sizeOfSelectedItemsText = findViewById(R.id.sizeOfSelectedItemsText);
@@ -183,8 +181,8 @@ public class AudioOnTouchActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
+        size = 0;
         String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
-
 
         sizeSelectedItems = 0;
         File directory = new File(path);
@@ -214,7 +212,6 @@ public class AudioOnTouchActivity extends Activity {
         if (!file.exists()) {
             file.mkdirs();
         }
-
         return (file.getAbsolutePath() + "/" + choosenPriority + "Rec "
                 + Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "꞉"
                 + Calendar.getInstance().get(Calendar.MINUTE) + "꞉"
@@ -304,60 +301,42 @@ public class AudioOnTouchActivity extends Activity {
     public void setPriority(int progress) {
         switch (progress) {
             case 0:
-                choosenPriority = "WillNot_";
-                willNotText.setTypeface(null, Typeface.BOLD);
-                couldText.setTypeface(null, Typeface.NORMAL);
-                shouldText.setTypeface(null, Typeface.NORMAL);
-                mustText.setTypeface(null, Typeface.NORMAL);
-
-                willNotText.setTextSize(16);
-                couldText.setTextSize(14);
-                shouldText.setTextSize(14);
-                mustText.setTextSize(14);
+                setChosenPriority(willNotText, couldText);
+                choosenPriority = "WillNot ";
                 break;
 
             case 1:
-                choosenPriority = "Could_";
-                willNotText.setTypeface(null, Typeface.NORMAL);
-                couldText.setTypeface(null, Typeface.BOLD);
-                shouldText.setTypeface(null, Typeface.NORMAL);
-                mustText.setTypeface(null, Typeface.NORMAL);
-
-                willNotText.setTextSize(14);
-                couldText.setTextSize(16);
-                shouldText.setTextSize(14);
-                mustText.setTextSize(14);
+                if(Objects.equals("WillNot", choosenPriority)){
+                    setChosenPriority(couldText, willNotText);
+                }else{
+                    setChosenPriority(couldText, shouldText);
+                }
+                choosenPriority = "Could ";
                 break;
 
             case 2:
-                choosenPriority = "Sould_";
-                willNotText.setTypeface(null, Typeface.NORMAL);
-                couldText.setTypeface(null, Typeface.NORMAL);
-                shouldText.setTypeface(null, Typeface.BOLD);
-                mustText.setTypeface(null, Typeface.NORMAL);
-
-                willNotText.setTextSize(14);
-                couldText.setTextSize(14);
-                shouldText.setTextSize(16);
-                mustText.setTextSize(14);
+                if(Objects.equals("Could", choosenPriority)){
+                    setChosenPriority(shouldText, couldText);
+                }else{
+                    setChosenPriority(shouldText, mustText);
+                }
+                choosenPriority = "Should ";
                 break;
 
             case 3:
-                choosenPriority = "Must_";
-                willNotText.setTypeface(null, Typeface.NORMAL);
-                couldText.setTypeface(null, Typeface.NORMAL);
-                shouldText.setTypeface(null, Typeface.NORMAL);
-                mustText.setTypeface(null, Typeface.BOLD);
-
-                willNotText.setTextSize(14);
-                couldText.setTextSize(14);
-                shouldText.setTextSize(14);
-                mustText.setTextSize(16);
+                setChosenPriority(mustText, shouldText);
                 break;
-
             default:
                 break;
         }
+    }
+
+    private void setChosenPriority(TextView choosenPriority, TextView previous){
+        choosenPriority.setTypeface(null, Typeface.BOLD);
+        previous.setTypeface(null, Typeface.NORMAL);
+
+        choosenPriority.setTextSize(16);
+        previous.setTextSize(14);
     }
 
     @Override
