@@ -14,8 +14,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".AudioOnTouchActivity"></activity>
-        <activity android:name=".MainMenuActivity">
+        <activity
+            android:name=".AudioOnTouchActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".MainMenuActivity"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,12 +26,17 @@
             </intent-filter>
         </activity>
         <activity
+            android:screenOrientation="portrait"
             android:name=".storage.StorageActivity"
             android:theme="@android:style/Theme.Light.NoTitleBar" />
         <activity android:name=".NewMeetingActivity" />
-        <activity android:name=".OpenExistingMeetingActivity"></activity>
+        <activity
+            android:name=".OpenExistingMeetingActivity"
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".MakePhoto"></activity>
+        <activity
+            android:name=".MakePhoto"
+            android:screenOrientation="portrait" />
 
 
         <provider
@@ -38,7 +46,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
 
     </application>

@@ -150,7 +150,6 @@ public class AudioOnTouchActivity extends Activity {
                                           boolean fromUser) {
                 // TODO Auto-generated method stub
                 setPriority(progress);
-
             }
 
             @Override
@@ -264,24 +263,17 @@ public class AudioOnTouchActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-            if (requestCode == GET_CHECKED_FILE_NAMES) {
-            if (resultCode == RESULT_OK) {
+            if (requestCode == GET_CHECKED_FILE_NAMES && resultCode == RESULT_OK) {
                 if (data != null) {
                     try {
                         checkedFileNames = data.getStringArrayListExtra("checkedFileNames");
                     } catch (RuntimeException e) {
                         e.printStackTrace();
                     }
-                }
             }
 
 
             }
-        if(requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK ){
-            Log.i("^^^^^^^^^^^^^^^^^^^^^", "^^^^^^^^^wykonano");
-        }
-
-
     }
 
     public void makePhoto(View view) {
