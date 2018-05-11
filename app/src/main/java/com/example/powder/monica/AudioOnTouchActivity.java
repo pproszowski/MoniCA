@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -61,7 +62,7 @@ public class AudioOnTouchActivity extends Activity {
             "2) Should -  wymaganie istotne dla powodzenia projektu, jednak nie są konieczne w aktualnej fazie cyklu projektu\n" +
             "3) Could - wymaganie mniej krytyczne i często są postrzegane jako takie, które dobrze żeby były. " +
             "Kilka takich spełnionych wymagań w projekcie może zwiększyć zadowolenie klienta przy równoczesnym niskim koszcie ich dostarczenia.\n" +
-            "4) Will not - informację, które w chwilii obecnej nie są wymagane, ale mogą się stać np. w kolejnym cyklu projektu";
+            "4) Will not - informacje, które w chwilii obecnej nie są wymagane, ale mogą się stać np. w kolejnym cyklu projektu";
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -357,5 +358,17 @@ public class AudioOnTouchActivity extends Activity {
             default:
                 break;
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Intent openExistingMeetingIntent = new Intent(this, OpenExistingMeetingActivity.class);
+            openExistingMeetingIntent.putExtra("recorderName", recorderName);
+            startActivity(openExistingMeetingIntent);
+            overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }
