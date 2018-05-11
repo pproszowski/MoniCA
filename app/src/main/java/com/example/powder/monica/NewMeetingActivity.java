@@ -24,6 +24,7 @@ public class NewMeetingActivity extends AppCompatActivity {
     private TextInputEditText inputEmail;
     private String recorderName;
     private String mailSubject;
+    private String path;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,33 +35,43 @@ public class NewMeetingActivity extends AppCompatActivity {
         inputEmail = findViewById(R.id.emailInput);
         recorderName = getIntent().getExtras().getString("recorderName");
 
-        confirmButton.setOnClickListener((view) ->
-                {
-                    if(meetingName.getText().length() == 0){
-                        Toast.makeText(getApplicationContext(), "Nazwa spotkania nie może być pusta!", Toast.LENGTH_SHORT).show();
-                        return;
+        confirmButton.setOnClickListener((view) -> {
+                    path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName;
+                    directory = new File(path);
+                    File[] files = directory.listFiles();
+
+                    for (File file : files){
+                        if(meetingName.getText().toString().compareTo(file.getName().toString()) == 0){
+                            Toast.makeText(getApplicationContext(), "Spotkanie o takiej nazwie już istnieje", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                     }
+
+                        if (meetingName.getText().length() == 0) {
+                            Toast.makeText(getApplicationContext(), "Nazwa spotkania nie może być pusta!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                     mailSubject = meetingName.getText() + " "
                             + Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + "/"
-                            + (Calendar.getInstance().get(Calendar.MONTH)+1) + "/"
+                            + (Calendar.getInstance().get(Calendar.MONTH) + 1) + "/"
                             + Calendar.getInstance().get(Calendar.YEAR) + " godz. "
-                            + Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+"꞉"
+                            + Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "꞉"
                             + Calendar.getInstance().get(Calendar.MINUTE);
 
-                    String path = Environment.getExternalStorageDirectory().getPath()+"/AudioRecorder/"+ meetingName.getText().toString();
+                    path += "/" + meetingName.getText().toString();
                     directory = new File(path);
-                    if(!directory.exists()) {
-                    directory.mkdirs();
+                    if (!directory.exists()) {
+                        directory.mkdirs();
                     }
 
                     file = new File(path, "email.txt");
 
                     try {
-                        writer = new PrintWriter(path+"/email.txt");
+                        writer = new PrintWriter(path + "/email.txt");
                     } catch (FileNotFoundException e) {
                         System.out.println(e.getMessage());
                     }
-                    if(writer !=null) {
+                    if (writer != null) {
                         writer.println(mailSubject);
                         writer.println(inputEmail.getText().toString());
                         writer.close();
@@ -71,6 +82,7 @@ public class NewMeetingActivity extends AppCompatActivity {
                     newIntent.putExtra("mailSubject", mailSubject.toString());
                     startActivity(newIntent);
                 }
+
         );
 
     }
