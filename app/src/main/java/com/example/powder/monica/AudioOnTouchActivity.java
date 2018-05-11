@@ -53,7 +53,8 @@ public class AudioOnTouchActivity extends Activity {
     private static final int GET_CHECKED_FILE_NAMES = 1;
     private static final int REQUEST_TAKE_PHOTO = 2;
     private String choosenPriority = "WillNot_";
-
+    private String path;
+    private double sizeSelectedItems;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -81,49 +82,56 @@ public class AudioOnTouchActivity extends Activity {
 
         sendEmailButton.setOnClickListener((view) -> {
 
-            ArrayList<Uri> filesUri = new ArrayList<>();
-            String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
-            File directory = new File(path);
 
-            File[] files = directory.listFiles();
+            if(sizeSelectedItems <= 10000000) {
+                ArrayList<Uri> filesUri = new ArrayList<>();
+                path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
+                File directory = new File(path);
 
-            for (File file : files) {
-                if (checkedFileNames.contains(file.getName())) {
-                    filesUri.add(Uri.fromFile(file));
+                File[] files = directory.listFiles();
+
+                for (File file : files) {
+                    if (checkedFileNames.contains(file.getName())) {
+                        filesUri.add(Uri.fromFile(file));
+                    }
+                }
+
+                File file = new File(path, "email.txt");
+
+                Scanner in = null;
+                try {
+                    in = new Scanner(file);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+
+                List<String> addresses = new ArrayList<>();
+                if (file.exists()) {
+                    mailSubject = in.nextLine();
+                    while (in.hasNext()) {
+                        addresses.add(in.nextLine());
+                    }
+
+
+                    if (addresses.isEmpty()) {
+                        Toast.makeText(getApplicationContext(), "Brak podanych maili!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    String a[] = new String[0];
+                    Intent email = new Intent(Intent.ACTION_SEND_MULTIPLE);
+                    email.putParcelableArrayListExtra(Intent.EXTRA_STREAM, filesUri);
+                    email.putExtra(Intent.EXTRA_EMAIL, addresses.toArray(a));
+                    email.putExtra(Intent.EXTRA_SUBJECT, mailSubject);
+                    email.putExtra(Intent.EXTRA_TEXT, "MoniCA");
+                    email.setType("message/rfc822");
+                    startActivity(Intent.createChooser(email, "Choose an Email client :"));
                 }
             }
-
-            File file = new File(path, "email.txt");
-
-            Scanner in = null;
-            try {
-                in = new Scanner(file);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-
-            List<String> addresses = new ArrayList<>();
-            if (file.exists()) {
-                mailSubject = in.nextLine();
-                while (in.hasNext()) {
-                    addresses.add(in.nextLine());
-                }
-
-
-                if (addresses.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "Brak podanych maili!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                String a[] = new String[0];
-                Intent email = new Intent(Intent.ACTION_SEND_MULTIPLE);
-                email.putParcelableArrayListExtra(Intent.EXTRA_STREAM, filesUri);
-                email.putExtra(Intent.EXTRA_EMAIL, addresses.toArray(a));
-                email.putExtra(Intent.EXTRA_SUBJECT, mailSubject);
-                email.putExtra(Intent.EXTRA_TEXT, "MoniCA");
-                email.setType("message/rfc822");
-                startActivity(Intent.createChooser(email, "Choose an Email client :"));
+            else
+            {
+                Toast.makeText(getApplicationContext(), "Rozmiar zaznaczonych plików większy niż 10 MB.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -170,8 +178,7 @@ public class AudioOnTouchActivity extends Activity {
         String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
 
 
-        size = 0;
-        double sizeOfSelectedFiles = 0;
+        sizeSelectedItems = 0;
         File directory = new File(path);
 
         if (!directory.exists()) {
@@ -182,14 +189,14 @@ public class AudioOnTouchActivity extends Activity {
 
         for (File file : files) {
             if (checkedFileNames.contains(file.getName())) {
-                sizeOfSelectedFiles += file.length();
+                sizeSelectedItems += file.length();
             }
             if (!"email.txt".equals(file.getName())) {
                 size += file.length();
             }
         }
         sizeText.setText(String.format("Size : %sKB", size / 1000));
-        sizeOfSelectedItemsText.setText(String.format("Selected files size : %sKB", sizeOfSelectedFiles / 1000));
+        sizeOfSelectedItemsText.setText(String.format("Selected files size : %sKB", sizeSelectedItems / 1000));
     }
 
     private String getFilename() {
@@ -234,7 +241,7 @@ public class AudioOnTouchActivity extends Activity {
     private void stopRecording() {
         try {
             recorder.stop();
-            size += new File(choosenPriority + recordedFileName).length();
+            size += new File(recordedFileName).length();
             recordingStatus.setText(recordedFileName);
             sizeText.setText(String.format("Size : %sKB", size / 1000));
         } catch (RuntimeException e) {
