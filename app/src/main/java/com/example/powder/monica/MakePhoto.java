@@ -120,24 +120,18 @@ public class MakePhoto extends Activity {
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         Bitmap b = BitmapFactory.decodeFile(imgFileOrig.getAbsolutePath(), options);
 
-        int origWidth = b.getWidth();
-        int origHeight = b.getHeight();
+        final int destWidth = 1366;
+        final int destHeight = 768;
 
-        final int destWidth = 1080;
-
-        if (origWidth > destWidth) {
-            int destHeight = origHeight / (origWidth / destWidth);
-            Bitmap b2 = Bitmap.createScaledBitmap(b, destWidth, destHeight, false);
-            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-            b2.compress(Bitmap.CompressFormat.JPEG, 85, outStream);
-            File f = new File(Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName, newNameFile.getName());
-            f.createNewFile();
-            FileOutputStream fo = new FileOutputStream(f);
-            fo.write(outStream.toByteArray());
-            fo.close();
-        }
+        Bitmap b2 = Bitmap.createScaledBitmap(b, destWidth, destHeight, false);
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        b2.compress(Bitmap.CompressFormat.JPEG, 85, outStream);
+        File f = new File(Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName, newNameFile.getName());
+        f.createNewFile();
+        FileOutputStream fo = new FileOutputStream(f);
+        fo.write(outStream.toByteArray());
+        fo.close();
     }
-
 
 }
 
