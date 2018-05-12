@@ -251,6 +251,8 @@ public class AudioOnTouchActivity extends Activity {
             sizeText.setText(String.format("Size : %sKB", size / 1000));
         } catch (RuntimeException e) {
             recordingStatus.setText(R.string.record_too_short);
+            File file = new File(recordedFileName);
+            file.delete();
         }
 
         if (recorder != null) {

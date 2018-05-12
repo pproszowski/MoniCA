@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -41,7 +42,7 @@ public class NewMeetingActivity extends AppCompatActivity {
                     File[] files = directory.listFiles();
 
                     for (File file : files){
-                        if(meetingName.getText().toString().compareTo(file.getName().toString()) == 0){
+                        if(meetingName.getText().toString().compareToIgnoreCase(file.getName().toString()) == 0){
                             Toast.makeText(getApplicationContext(), "Spotkanie o takiej nazwie już istnieje", Toast.LENGTH_SHORT).show();
                             return;
                         }
