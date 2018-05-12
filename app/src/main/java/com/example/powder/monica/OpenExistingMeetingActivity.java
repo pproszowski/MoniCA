@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -34,5 +35,16 @@ public class OpenExistingMeetingActivity extends ListActivity{
             onTouchActivity.putExtra("Name", meetings[position]);
             startActivity(onTouchActivity);
         });
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Intent mainMenuIntent = new Intent(this, MainMenuActivity.class);
+            startActivity(mainMenuIntent);
+            overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

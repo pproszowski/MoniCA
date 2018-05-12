@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 import android.annotation.SuppressLint;
@@ -17,7 +17,7 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -37,7 +37,6 @@ public class AudioOnTouchActivity extends Activity {
     private TextView couldText;
     private TextView shouldText;
     private TextView mustText;
-    private SeekBar priorityBar;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
     private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
     private String recorderName;
@@ -52,7 +51,7 @@ public class AudioOnTouchActivity extends Activity {
     private List<String> checkedFileNames = new ArrayList<>();
     private static final int GET_CHECKED_FILE_NAMES = 1;
     private static final int REQUEST_TAKE_PHOTO = 2;
-    private String choosenPriority = "WillNot_";
+    private String choosenPriority = "WillNot ";
     private String path;
     private double sizeSelectedItems;
     private final String emailContent = "\nLegenda do notatek:\n" +
@@ -61,7 +60,7 @@ public class AudioOnTouchActivity extends Activity {
             "2) Should -  wymaganie istotne dla powodzenia projektu, jednak nie są konieczne w aktualnej fazie cyklu projektu\n" +
             "3) Could - wymaganie mniej krytyczne i często są postrzegane jako takie, które dobrze żeby były. " +
             "Kilka takich spełnionych wymagań w projekcie może zwiększyć zadowolenie klienta przy równoczesnym niskim koszcie ich dostarczenia.\n" +
-            "4) Will not - informację, które w chwilii obecnej nie są wymagane, ale mogą się stać np. w kolejnym cyklu projektu";
+            "4) Will not - informacje, które w chwilii obecnej nie są wymagane, ale mogą się stać np. w kolejnym cyklu projektu";
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -78,7 +77,7 @@ public class AudioOnTouchActivity extends Activity {
         couldText = findViewById(R.id.couldText);
         shouldText = findViewById(R.id.shouldText);
         mustText = findViewById(R.id.mustText);
-        priorityBar = findViewById(R.id.priorityBar);
+        SeekBar priorityBar = findViewById(R.id.priorityBar);
         Button ftpButton = findViewById(R.id.ftp);
         Button sendEmailButton = findViewById(R.id.email);
         sizeOfSelectedItemsText = findViewById(R.id.sizeOfSelectedItemsText);
@@ -182,8 +181,8 @@ public class AudioOnTouchActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
+        size = 0;
         String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
-
 
         sizeSelectedItems = 0;
         File directory = new File(path);
@@ -213,7 +212,6 @@ public class AudioOnTouchActivity extends Activity {
         if (!file.exists()) {
             file.mkdirs();
         }
-
         return (file.getAbsolutePath() + "/" + choosenPriority + "Rec "
                 + Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "꞉"
                 + Calendar.getInstance().get(Calendar.MINUTE) + "꞉"
@@ -303,59 +301,54 @@ public class AudioOnTouchActivity extends Activity {
     public void setPriority(int progress) {
         switch (progress) {
             case 0:
-                choosenPriority = "WillNot_";
-                willNotText.setTypeface(null, Typeface.BOLD);
-                couldText.setTypeface(null, Typeface.NORMAL);
-                shouldText.setTypeface(null, Typeface.NORMAL);
-                mustText.setTypeface(null, Typeface.NORMAL);
-
-                willNotText.setTextSize(16);
-                couldText.setTextSize(14);
-                shouldText.setTextSize(14);
-                mustText.setTextSize(14);
+                setChosenPriority(willNotText, couldText);
+                choosenPriority = "WillNot ";
                 break;
 
             case 1:
-                choosenPriority = "Could_";
-                willNotText.setTypeface(null, Typeface.NORMAL);
-                couldText.setTypeface(null, Typeface.BOLD);
-                shouldText.setTypeface(null, Typeface.NORMAL);
-                mustText.setTypeface(null, Typeface.NORMAL);
-
-                willNotText.setTextSize(14);
-                couldText.setTextSize(16);
-                shouldText.setTextSize(14);
-                mustText.setTextSize(14);
+                if(Objects.equals("WillNot ", choosenPriority)){
+                    setChosenPriority(couldText, willNotText);
+                }else{
+                    setChosenPriority(couldText, shouldText);
+                }
+                choosenPriority = "Could ";
                 break;
 
             case 2:
-                choosenPriority = "Sould_";
-                willNotText.setTypeface(null, Typeface.NORMAL);
-                couldText.setTypeface(null, Typeface.NORMAL);
-                shouldText.setTypeface(null, Typeface.BOLD);
-                mustText.setTypeface(null, Typeface.NORMAL);
-
-                willNotText.setTextSize(14);
-                couldText.setTextSize(14);
-                shouldText.setTextSize(16);
-                mustText.setTextSize(14);
+                if(Objects.equals("Could ", choosenPriority)){
+                    setChosenPriority(shouldText, couldText);
+                }else{
+                    setChosenPriority(shouldText, mustText);
+                }
+                choosenPriority = "Should ";
                 break;
 
             case 3:
-                choosenPriority = "Must_";
-                willNotText.setTypeface(null, Typeface.NORMAL);
-                couldText.setTypeface(null, Typeface.NORMAL);
-                shouldText.setTypeface(null, Typeface.NORMAL);
-                mustText.setTypeface(null, Typeface.BOLD);
-
-                willNotText.setTextSize(14);
-                couldText.setTextSize(14);
-                shouldText.setTextSize(14);
-                mustText.setTextSize(16);
+                setChosenPriority(mustText, shouldText);
+                choosenPriority = "Must ";
                 break;
-
             default:
                 break;
         }
+    }
+
+    private void setChosenPriority(TextView chosenPriority, TextView previous){
+        chosenPriority.setTypeface(null, Typeface.BOLD);
+        previous.setTypeface(null, Typeface.NORMAL);
+
+        chosenPriority.setTextSize(16);
+        previous.setTextSize(14);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Intent openExistingMeetingIntent = new Intent(this, OpenExistingMeetingActivity.class);
+            openExistingMeetingIntent.putExtra("recorderName", recorderName);
+            startActivity(openExistingMeetingIntent);
+            overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

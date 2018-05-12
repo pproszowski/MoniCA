@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.KeyEvent;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -41,18 +41,18 @@ public class StorageActivity extends ListActivity {
 
 
         for (File file : files) {
-            if(!file.getName().equals("email.txt")){
+            if (!file.getName().equals("email.txt")) {
                 String name = file.getName();
                 fileItems.add(new FileItem(name, file.length(), false));
             }
         }
 
-        try{
+        try {
             List<String> checkedFileNames = getIntent().getExtras().getStringArrayList("checkedFileNames");
-            if(checkedFileNames != null){
-              selectCheckBoxes(checkedFileNames);
+            if (checkedFileNames != null) {
+                selectCheckBoxes(checkedFileNames);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -60,53 +60,53 @@ public class StorageActivity extends ListActivity {
         ListView listView = getListView();
         listView.setTextFilterEnabled(true);
 
-            listView.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext(), listView) {
+        listView.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext(), listView) {
 
-                @Override
-                public void onClick() {
-                    super.onClick();
-                    if (getPosition() != -1) {
-                        int position = getPosition() + 1;
-                        File file = files[position];
-                        if (file.getName().contains("jpg")) {
-                            openImage(file, listView.getContext());
-                        } else {
-                            openAudio(file);
-                        }
+            @Override
+            public void onClick() {
+                super.onClick();
+                if (getPosition() != -1) {
+                    int position = getPosition() + 1;
+                    File file = files[position];
+                    if (file.getName().contains("jpg")) {
+                        openImage(file, listView.getContext());
+                    } else {
+                        openAudio(file);
                     }
                 }
-
-                @Override
-                public void onLongClick() {
-                    super.onLongClick();
-                }
-
-
-                @Override
-                public void onSwipeLeft() {
-                    super.onSwipeLeft();
-                    if(files.length < 2){
-                        return;
-                    }
-                    if (getPosition() != -1) {
-                        int position = getPosition() + 1;
-                        File file = files[position];
-                        deleteItem(file);
-                        Toast.makeText(getApplicationContext(), "Usunięto " + file.getName(), Toast.LENGTH_LONG).show();
-                    }
             }
 
-                @Override
-                public void onSwipeRight() {
-                    super.onSwipeRight();
-                    if(files.length < 2){
-                        Toast.makeText(getApplicationContext(), "Brak plików w folderze." , Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    addArchive(files, path);
-                    Toast.makeText(getApplicationContext(), "Dodano archiwum zip", Toast.LENGTH_LONG).show();
+            @Override
+            public void onLongClick() {
+                super.onLongClick();
+            }
+
+
+            @Override
+            public void onSwipeLeft() {
+                super.onSwipeLeft();
+                if (files.length < 2) {
+                    return;
                 }
-            });
+                if (getPosition() != -1) {
+                    int position = getPosition() + 1;
+                    File file = files[position];
+                    deleteItem(file);
+                    Toast.makeText(getApplicationContext(), "Usunięto " + file.getName(), Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onSwipeRight() {
+                super.onSwipeRight();
+                if (files.length < 2) {
+                    Toast.makeText(getApplicationContext(), "Brak plików w folderze.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                addArchive(files, path);
+                Toast.makeText(getApplicationContext(), "Dodano archiwum zip", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void openImage(File file, Context context) {
@@ -126,15 +126,15 @@ public class StorageActivity extends ListActivity {
             mediaPlayer.setDataSource(filePath);
             mediaPlayer.prepare();
             mediaPlayer.start();
-            Toast.makeText(getApplicationContext(), "Odtwarzam... " + file.getName() ,Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Odtwarzam... " + file.getName(), Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void deleteItem(File file) {
-        FileItem fileItem =findFileItemInTheSetByName(file.getName());
-        if(fileItem != null){
+        FileItem fileItem = findFileItemInTheSetByName(file.getName());
+        if (fileItem != null) {
             fileItems.remove(fileItem);
         }
         file.delete();
@@ -145,24 +145,24 @@ public class StorageActivity extends ListActivity {
     private void addArchive(File[] files, String path) {
         ZipManager archive = new ZipManager();
         List<String> fileNamesList = new ArrayList<>();
-        for(File f : files){
+        for (File f : files) {
             fileNamesList.add(path + f.getName());
         }
-        String [ ] fileNames = fileNamesList.toArray(new String[0]);
-        archive.zip(fileNames, path+name+".zip");
+        String[] fileNames = fileNamesList.toArray(new String[0]);
+        archive.zip(fileNames, path + name + ".zip");
         startActivity(getIntent());
         finish();
     }
 
     private void selectCheckBoxes(List<String> checkedFileNames) {
-        for(FileItem fileItem : fileItems){
+        for (FileItem fileItem : fileItems) {
             if (checkedFileNames.contains(fileItem.getName())) {
                 fileItem.setChecked(true);
             }
         }
     }
 
-    private FileItem findFileItemInTheSetByName(String name){
+    private FileItem findFileItemInTheSetByName(String name) {
         for (FileItem fileItem : fileItems) {
             if (fileItem.getName().equals(name)) {
                 return fileItem;
@@ -173,20 +173,17 @@ public class StorageActivity extends ListActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode == KeyEvent.KEYCODE_BACK){
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             Intent data = new Intent();
             ArrayList<String> checkedFileNames = new ArrayList<>();
-            for(FileItem fileItem : fileItems){
-                if(fileItem.isChecked()){
+            for (FileItem fileItem : fileItems) {
+                if (fileItem.isChecked()) {
                     checkedFileNames.add(fileItem.getName());
                 }
             }
-            if(!checkedFileNames.isEmpty()){
-                data.putStringArrayListExtra("checkedFileNames", checkedFileNames);
-                setResult(RESULT_OK, data);
-            }
+            data.putStringArrayListExtra("checkedFileNames", checkedFileNames);
+            setResult(RESULT_OK, data);
         }
         return super.onKeyDown(keyCode, event);
     }
-
 }
