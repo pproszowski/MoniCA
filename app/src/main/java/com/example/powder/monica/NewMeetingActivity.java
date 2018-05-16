@@ -14,8 +14,13 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Scanner;
 import java.util.jar.Attributes;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NewMeetingActivity extends AppCompatActivity {
 
@@ -27,7 +32,9 @@ public class NewMeetingActivity extends AppCompatActivity {
     private TextInputEditText inputEmail;
     private String recorderName;
     private String mailSubject;
+    String[] emailString;
     private String path;
+    public final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     private String deleteUntilComma(String str){
         while(str.charAt(str.length()-1)!=','){
@@ -48,6 +55,8 @@ public class NewMeetingActivity extends AppCompatActivity {
         inputEmail.addTextChangedListener(new TextWatcher() {
 
             public void afterTextChanged(Editable s) {
+
+
                 if((inputEmail.getText().toString().length() - inputEmail.getText().toString().replace(",", "").length()) >=20 ) {
                     Toast.makeText(getApplicationContext(), "Osiągnięto limit 20 e-maili", Toast.LENGTH_SHORT).show();
                     if(inputEmail.getText().toString().charAt(inputEmail.length()-1)==','){
@@ -68,6 +77,17 @@ public class NewMeetingActivity extends AppCompatActivity {
         });
 
         confirmButton.setOnClickListener((view) -> {
+
+                    emailString=inputEmail.getText().toString().split(",", 20);
+                        for(String email:emailString)
+                    {
+                        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(email);
+                        if(!matcher.matches()) {
+                            Toast.makeText(getApplicationContext(), "Podaj poprawny email", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
+
                     path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName;
                     directory = new File(path);
                     if(directory.exists()) {
