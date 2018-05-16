@@ -12,23 +12,32 @@ import java.util.Scanner;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.powder.monica.storage.StorageActivity;
 
 
-public class AudioOnTouchActivity extends Activity {
+public class AudioOnTouchActivity extends AppCompatActivity {
     private TouchableButton recordButton;
     private TextView recordingStatus;
     private TextView sizeText;
@@ -62,6 +71,37 @@ public class AudioOnTouchActivity extends Activity {
             "Kilka takich spełnionych wymagań w projekcie może zwiększyć zadowolenie klienta przy równoczesnym niskim koszcie ich dostarczenia.\n" +
             "4) Will not - informacje, które w chwilii obecnej nie są wymagane, ale mogą się stać np. w kolejnym cyklu projektu";
 
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.ftp_setting, menu);
+        //inflater.inflate(R.menu.user_setting, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.ftp_settings_action_bar: {
+
+
+                startActivity(new Intent(AudioOnTouchActivity.this, FTPSettingActivity.class));
+                return true;
+            }
+
+            case R.id.user_settings_action_bar: {
+                //TODO: create UserSettingActivity.class to connect here;
+//                startActivity(new Intent(this, UserSettingActivity.class));
+                return true;
+            }
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+
     @SuppressLint("SetTextI18n")
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,7 +121,14 @@ public class AudioOnTouchActivity extends Activity {
         Button ftpButton = findViewById(R.id.ftp);
         Button sendEmailButton = findViewById(R.id.email);
         sizeOfSelectedItemsText = findViewById(R.id.sizeOfSelectedItemsText);
-        ftpButton.setOnClickListener((view) -> new FTP(recorderName, meetingName).execute());
+        SharedPreferences sharedPref = getSharedPreferences("defaultFTP.xml", 0);
+        ftpButton.setOnClickListener((view) -> new FTP(
+                sharedPref.getString("Custom_hostname", getString(R.string.default_hostname)),
+                sharedPref.getString("Custom_login", getString(R.string.default_login)),
+                sharedPref.getString("Custom_password", getString(R.string.default_password)),
+                sharedPref.getString("Custom_directory", getString(R.string.default_directory)),
+                recorderName,
+                meetingName).execute());
 
         willNotText.setTypeface(null, Typeface.BOLD);
         willNotText.setTextSize(16);
@@ -353,4 +400,6 @@ public class AudioOnTouchActivity extends Activity {
         }
         return super.onKeyDown(keyCode, event);
     }
+
+
 }

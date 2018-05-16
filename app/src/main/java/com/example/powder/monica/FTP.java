@@ -1,5 +1,6 @@
 package com.example.powder.monica;
 
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Environment;
 
@@ -11,38 +12,44 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class FTP extends AsyncTask <Void,Void,Void>{
+public class FTP extends AsyncTask<Void, Void, Void> {
 
     private Exception exception;
+    private String hostname;
+    private String login;
+    private String password;
+    private String directoryPath;
     private String recorderName;
-    private String recorderName2;
+    private String meetingName;
     private FileInputStream data;
     private BufferedInputStream buffIn;
 
-    FTP(String recorderName,String recorderName2)
-    {
-    super();
-    this.recorderName=recorderName;
-    this.recorderName2=recorderName2;
+
+    FTP(String hostname, String login, String password, String directory, String recorderName, String meetingName) {
+        super();
+        this.hostname = hostname;
+        this.login = login;
+        this.password = password;
+        this.directoryPath = directory;
+        this.recorderName = recorderName;
+        this.meetingName = meetingName;
     }
 
 
     @Override
     protected Void doInBackground(Void... voids) {
         FTPClient client = new FTPClient();
-        String path = Environment.getExternalStorageDirectory().getPath() +"/"+recorderName+"/"+recorderName2;
+        String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
         File directory = new File(path);
         File[] files = directory.listFiles();
 
 
         try {
-            client.connect("ftp.mkwk018.cba.pl");
-            client.login("aras112", "zaq1@WSX");
+            client.connect(hostname);
+            client.login(login, password);
             client.setFileType(FTPClient.BINARY_FILE_TYPE);
-            client.makeDirectory("aras.cba.pl/"+recorderName2+"/");
-            client.changeWorkingDirectory("aras.cba.pl/"+recorderName2+"/");
-
-
+            client.makeDirectory(directoryPath + "/" + meetingName + "/");
+            client.changeWorkingDirectory("aras.cba.pl/" + meetingName + "/");
 
 
             for (File file : files) {
@@ -57,11 +64,10 @@ public class FTP extends AsyncTask <Void,Void,Void>{
             System.out.println(e.getMessage());
         }
 
-    return  null;
+        return null;
     }
 
 
-
-    }
+}
 
 
