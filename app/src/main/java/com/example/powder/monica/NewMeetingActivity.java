@@ -5,6 +5,8 @@ import android.os.Environment;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
@@ -27,6 +29,13 @@ public class NewMeetingActivity extends AppCompatActivity {
     private String mailSubject;
     private String path;
 
+    private String deleteUntilComma(String str){
+        while(str.charAt(str.length()-1)!=','){
+            str=str.substring(0,str.length()-1);
+        }
+        return str;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,6 +44,28 @@ public class NewMeetingActivity extends AppCompatActivity {
         meetingName = findViewById(R.id.meetingNameInput);
         inputEmail = findViewById(R.id.emailInput);
         recorderName = getIntent().getExtras().getString("recorderName");
+
+        inputEmail.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {
+                if((inputEmail.getText().toString().length() - inputEmail.getText().toString().replace(",", "").length()) >=20 ) {
+                    Toast.makeText(getApplicationContext(), "Osiągnięto limit 20 e-maili", Toast.LENGTH_SHORT).show();
+                    if(inputEmail.getText().toString().charAt(inputEmail.length()-1)==','){
+                        inputEmail.setText(inputEmail.getText().toString().substring(0,inputEmail.length()-1));
+                        inputEmail.setSelection(inputEmail.length());
+
+                    }else {
+                        inputEmail.setText(deleteUntilComma(inputEmail.getText().toString()));
+                        inputEmail.setSelection(inputEmail.length());
+                    }
+                }
+            }public void beforeTextChanged(CharSequence s, int start,
+                                           int count, int after) {
+            }
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+            }
+        });
 
         confirmButton.setOnClickListener((view) -> {
                     path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName;
