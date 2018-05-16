@@ -70,12 +70,14 @@ public class NewMeetingActivity extends AppCompatActivity {
         confirmButton.setOnClickListener((view) -> {
                     path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName;
                     directory = new File(path);
-                    File[] files = directory.listFiles();
+                    if(directory.exists()) {
+                        File[] files = directory.listFiles();
 
-                    for (File file : files){
-                        if(meetingName.getText().toString().compareToIgnoreCase(file.getName().toString()) == 0){
-                            Toast.makeText(getApplicationContext(), "Spotkanie o takiej nazwie już istnieje", Toast.LENGTH_SHORT).show();
-                            return;
+                        for (File file : files) {
+                            if (meetingName.getText().toString().compareToIgnoreCase(file.getName().toString()) == 0) {
+                                Toast.makeText(getApplicationContext(), "Spotkanie o takiej nazwie już istnieje", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
                         }
                     }
 
