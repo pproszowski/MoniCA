@@ -25,7 +25,7 @@ public class FTP extends AsyncTask<Void, Void, Void> {
     private BufferedInputStream buffIn;
 
 
-    FTP(String hostname, String login, String password, String directory, String recorderName, String meetingName) {
+    public FTP(String hostname, String login, String password, String directory, String recorderName, String meetingName) {
         super();
         this.hostname = hostname;
         this.login = login;

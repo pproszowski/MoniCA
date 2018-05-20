@@ -84,4 +84,6 @@
     <string name="create">Utwórz</string>
     <string name="name_of_the_meeting">Nazwa Spotkania</string>
     <string name="meeting_name">Nazwa Spotkania</string>
+    <string name="size">Rozmiar</string>
+    <string name="send">Wyślij</string>
 </resources>

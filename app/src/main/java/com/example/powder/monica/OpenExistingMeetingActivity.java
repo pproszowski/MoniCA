@@ -3,16 +3,13 @@ package com.example.powder.monica;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.Arrays;
-import java.util.List;
 
 public class OpenExistingMeetingActivity extends ListActivity{
     private String recorderName;
@@ -25,7 +22,7 @@ public class OpenExistingMeetingActivity extends ListActivity{
         File file = new File(path);
         String[] meetings = file.list((dir, name) -> new File(dir, name).isDirectory());
 
-        setListAdapter(new ArrayAdapter<>(this, R.layout.activity_storage,Arrays.asList(meetings)));
+        setListAdapter(new ArrayAdapter<>(this, R.layout.activity_meetings,Arrays.asList(meetings)));
         ListView listView = getListView();
         listView.setTextFilterEnabled(true);
 

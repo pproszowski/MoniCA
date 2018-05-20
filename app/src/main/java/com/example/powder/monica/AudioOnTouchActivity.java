@@ -314,6 +314,10 @@ public class AudioOnTouchActivity extends AppCompatActivity {
     public void goToStorage(View view) {
         Intent intent = new Intent(this, StorageActivity.class);
         intent.putExtra("Name", meetingName);
+        intent.putExtra("sizeSelectedItems", sizeSelectedItems);
+        intent.putExtra("recorderName", recorderName);
+        intent.putExtra("meetingName", meetingName);
+        intent.putExtra("mailSubject", mailSubject);
         if (checkedFileNames != null && !checkedFileNames.isEmpty()) {
             intent.putStringArrayListExtra("checkedFileNames", (ArrayList<String>) checkedFileNames);
         }
