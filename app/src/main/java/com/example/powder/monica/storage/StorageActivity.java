@@ -11,14 +11,26 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.RequiresApi;
+import android.support.constraint.ConstraintLayout;
+import android.text.Layout;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.powder.monica.FTP;
@@ -40,10 +52,13 @@ public class StorageActivity extends ListActivity {
     private File[] files;
     private Set<FileItem> fileItems = new LinkedHashSet<>();
     private String name;
-    private double sizeSelectedItems;
+    private Double sizeSelectedItems;
     private String recorderName;
     private String meetingName;
     private ArrayList<String> checkedFileNames = new ArrayList<String>();
+    protected ProgressBar progressBar;
+    protected TextView percentageProgress;
+    private String path;
     private String mailSubject ;
     private String emailContent = "\nLegenda do notatek:\n" +
             "Notatki zaczynają się prefixami, które świadczą o ważności informacji\n" +
@@ -61,14 +76,16 @@ public class StorageActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_storage);
         sendButton = (Button) findViewById(R.id.send_popup);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        percentageProgress = (TextView) findViewById(R.id.percProgress);
         overridePendingTransition(0, 0);
         name = getIntent().getExtras().getString("Name");
-        sizeSelectedItems = getIntent().getExtras().getDouble("sizeSelectedItems");
+        //sizeSelectedItems = getIntent().getExtras().getDouble("sizeSelectedItems");
         recorderName = getIntent().getExtras().getString("recorderName");
         meetingName = getIntent().getExtras().getString("meetingName");
 
 
-        String path = Environment.getExternalStorageDirectory().getPath()
+        path = Environment.getExternalStorageDirectory().getPath()
                 + "/AudioRecorder/" + name + "/";
         File directory = new File(path);
         files = directory.listFiles();
@@ -81,11 +98,12 @@ public class StorageActivity extends ListActivity {
             }
         }
 
-
-
-        setListAdapter(new StorageArrayAdapter(this, new ArrayList<>(fileItems)));
+        ProgressUpdater pu = new ProgressUpdater(checkedFileNames, fileItems,sizeSelectedItems, progressBar, percentageProgress, path);
+        setListAdapter(new StorageArrayAdapter(this, new ArrayList<>(fileItems), pu));
         ListView listView = getListView();
         listView.setTextFilterEnabled(true);
+
+
 
         listView.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext(), listView) {
 
@@ -102,6 +120,8 @@ public class StorageActivity extends ListActivity {
                     }
                 }
             }
+
+
 
             @Override
             public void onLongClick() {
@@ -137,6 +157,7 @@ public class StorageActivity extends ListActivity {
 
 
         sendButton.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View v) {
                 PopupMenu popup = new PopupMenu(StorageActivity.this, sendButton);
@@ -144,9 +165,6 @@ public class StorageActivity extends ListActivity {
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
-
-
-
                         if(item.getTitle().toString().compareToIgnoreCase("Email") == 0)
                             sendEmail();
                         else if(item.getTitle().toString().compareToIgnoreCase("Ftp") == 0)
@@ -165,7 +183,9 @@ public class StorageActivity extends ListActivity {
         });
 
 
+
 }
+
 
     private void openImage(File file, Context context) {
         final Intent intent = new Intent(Intent.ACTION_VIEW)
@@ -243,19 +263,29 @@ public class StorageActivity extends ListActivity {
 
     private void sendEmail() {
 
-        checkedFileNames.clear();
-        for (FileItem fileItem : fileItems) {
-            if (fileItem.isChecked()) {
-                checkedFileNames.add(fileItem.getName());
+        sizeSelectedItems = 0.0;
+        Log.i("^^^^^^^^^^^^^^", path.toString());
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        for (File file : files) {
+            if (checkedFileNames.contains(file.getName())) {
+                sizeSelectedItems += file.length();
             }
         }
 
         if(sizeSelectedItems <= 10000000) {
-            ArrayList<Uri> filesUri = new ArrayList<>();
-            String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName + "/";
-            File directory = new File(path);
+            checkedFileNames.clear();
+            for (FileItem fileItem : fileItems) {
+                if (fileItem.isChecked()) {
+                    checkedFileNames.add(fileItem.getName());
+                }
+            }
 
-            File[] files = directory.listFiles();
+
+            ArrayList<Uri> filesUri = new ArrayList<>();
+            directory = new File(path);
+
+            files = directory.listFiles();
 
             for (File file : files) {
                 if (checkedFileNames.contains(file.getName())) {

@@ -8,17 +8,21 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.powder.monica.R;
 
+import java.io.File;
 import java.util.List;
 
 public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
     private LayoutInflater inflater;
+    private ProgressUpdater pu;
 
-    public StorageArrayAdapter(Context context, List<FileItem> fileItems){
+    public StorageArrayAdapter(Context context, List<FileItem> fileItems, ProgressUpdater pu){
         super(context, R.layout.row_layout, R.id.itemTextView, fileItems);
         inflater = LayoutInflater.from(context);
+        this.pu = pu;
     }
 
     @Override
@@ -33,6 +37,7 @@ public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
             CheckBox cb = (CheckBox) v;
             FileItem fi = (FileItem) cb.getTag();
             fi.setChecked(cb.isChecked());
+            pu.updateProgress();
         });
 
         checkBox.setTag(fileItem);
