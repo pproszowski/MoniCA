@@ -229,10 +229,11 @@ public class StorageActivity extends ListActivity {
 
         for (File file : files) {
             if (checkedFileNames.contains(file.getName())) {
-                deleteItem(file);
+                file.delete();
             }
         }
-
+        startActivity(getIntent());
+        finish();
     }
 
     private void addArchive(File[] files, String path) {

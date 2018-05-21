@@ -46,6 +46,7 @@ public class AudioOnTouchActivity extends AppCompatActivity {
     private TextView couldText;
     private TextView shouldText;
     private TextView mustText;
+    private TextView meetingNameText;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
     private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
     private String recorderName;
@@ -63,14 +64,6 @@ public class AudioOnTouchActivity extends AppCompatActivity {
     private String choosenPriority = "WillNot ";
     private String path;
     private double sizeSelectedItems;
-    private final String emailContent = "\nLegenda do notatek:\n" +
-            "Notatki zaczynają się prefixami, które świadczą o ważności informacji\n" +
-            "1) Must - oznacza krytyczne wymaganie, które musi zostać spełnione na początku, aby projekt mógł się powieść\n" +
-            "2) Should -  wymaganie istotne dla powodzenia projektu, jednak nie są konieczne w aktualnej fazie cyklu projektu\n" +
-            "3) Could - wymaganie mniej krytyczne i często są postrzegane jako takie, które dobrze żeby były. " +
-            "Kilka takich spełnionych wymagań w projekcie może zwiększyć zadowolenie klienta przy równoczesnym niskim koszcie ich dostarczenia.\n" +
-            "4) Will not - informacje, które w chwilii obecnej nie są wymagane, ale mogą się stać np. w kolejnym cyklu projektu";
-
 
 
     @Override
@@ -101,7 +94,6 @@ public class AudioOnTouchActivity extends AppCompatActivity {
         }
     }
 
-
     @SuppressLint("SetTextI18n")
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -117,76 +109,14 @@ public class AudioOnTouchActivity extends AppCompatActivity {
         couldText = findViewById(R.id.couldText);
         shouldText = findViewById(R.id.shouldText);
         mustText = findViewById(R.id.mustText);
+        meetingNameText = (TextView) findViewById(R.id.meetingNameField);
+        meetingNameText.setText(meetingName);
         SeekBar priorityBar = findViewById(R.id.priorityBar);
-        Button ftpButton = findViewById(R.id.ftp);
-        Button sendEmailButton = findViewById(R.id.email);
-        sizeOfSelectedItemsText = findViewById(R.id.sizeOfSelectedItemsText);
         SharedPreferences sharedPref = getSharedPreferences("defaultFTP.xml", 0);
-        ftpButton.setOnClickListener((view) -> new FTP(
-                sharedPref.getString("Custom_hostname", getString(R.string.default_hostname)),
-                sharedPref.getString("Custom_login", getString(R.string.default_login)),
-                sharedPref.getString("Custom_password", getString(R.string.default_password)),
-                sharedPref.getString("Custom_directory", getString(R.string.default_directory)),
-                recorderName,
-                meetingName).execute());
 
         willNotText.setTypeface(null, Typeface.BOLD);
         willNotText.setTextSize(16);
 
-        sendEmailButton.setOnClickListener((view) -> {
-
-
-            if(sizeSelectedItems <= 10000000) {
-                ArrayList<Uri> filesUri = new ArrayList<>();
-                path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
-                File directory = new File(path);
-
-                File[] files = directory.listFiles();
-
-                for (File file : files) {
-                    if (checkedFileNames.contains(file.getName())) {
-                        filesUri.add(Uri.fromFile(file));
-                    }
-                }
-
-                File file = new File(path, "email.txt");
-
-                Scanner in = null;
-                try {
-                    in = new Scanner(file);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-
-
-                List<String> addresses = new ArrayList<>();
-                if (file.exists()) {
-                    mailSubject = in.nextLine();
-                    while (in.hasNext()) {
-                        addresses.add(in.nextLine());
-                    }
-
-
-                    if (addresses.isEmpty()) {
-                        Toast.makeText(getApplicationContext(), "Brak podanych maili!", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    String a[] = new String[0];
-                    Intent email = new Intent(Intent.ACTION_SEND_MULTIPLE);
-                    email.putParcelableArrayListExtra(Intent.EXTRA_STREAM, filesUri);
-                    email.putExtra(Intent.EXTRA_EMAIL, addresses.toArray(a));
-                    email.putExtra(Intent.EXTRA_SUBJECT, mailSubject);
-                    email.putExtra(Intent.EXTRA_TEXT, emailContent);
-                    email.setType("message/rfc822");
-                    startActivity(Intent.createChooser(email, "Choose an Email client :"));
-                }
-            }
-            else
-            {
-                Toast.makeText(getApplicationContext(), "Rozmiar zaznaczonych plików większy niż 10 MB.", Toast.LENGTH_SHORT).show();
-            }
-        });
 
         recordButton.setOnTouchListener((v, event) -> {
             recordButton.performClick();
@@ -249,7 +179,6 @@ public class AudioOnTouchActivity extends AppCompatActivity {
             }
         }
         sizeText.setText(String.format("Size : %sKB", size / 1000));
-        sizeOfSelectedItemsText.setText(String.format("Selected files size : %sKB", sizeSelectedItems / 1000));
     }
 
     private String getFilename() {
@@ -294,7 +223,7 @@ public class AudioOnTouchActivity extends AppCompatActivity {
         try {
             recorder.stop();
             size += new File(recordedFileName).length();
-            recordingStatus.setText(recordedFileName);
+            recordingStatus.setText("Record saved!" );
             sizeText.setText(String.format("Size : %sKB", size / 1000));
         } catch (RuntimeException e) {
             recordingStatus.setText(R.string.record_too_short);

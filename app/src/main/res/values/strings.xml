@@ -88,4 +88,6 @@
     <string name="send">Send</string>
     <string name="delete">Delete</string>
     <string name="check">Check all</string>
+    <string name="edit">Edit</string>
+    <string name="meeting">meeting</string>
 </resources>
