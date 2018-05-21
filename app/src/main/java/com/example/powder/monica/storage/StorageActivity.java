@@ -38,27 +38,25 @@ import java.util.Set;
 
 
 public class StorageActivity extends ListActivity {
-    private Button sendButton;
-    private File[] files;
-    private Set<FileItem> fileItems = new LinkedHashSet<>();
-    private String name;
-    private Double sizeSelectedItems;
-    private String recorderName;
-    private String meetingName;
-    private ArrayList<String> checkedFileNames = new ArrayList<String>();
-    protected ProgressBar progressBar;
-    protected TextView percentageProgress;
-    private String path;
-    private String mailSubject ;
-    private String emailContent = "\nLegenda do notatek:\n" +
+    private final static String emailContent = "\nLegenda do notatek:\n" +
             "Notatki zaczynają się prefixami, które świadczą o ważności informacji\n" +
             "1) Must - oznacza krytyczne wymaganie, które musi zostać spełnione na początku, aby projekt mógł się powieść\n" +
             "2) Should -  wymaganie istotne dla powodzenia projektu, jednak nie są konieczne w aktualnej fazie cyklu projektu\n" +
             "3) Could - wymaganie mniej krytyczne i często są postrzegane jako takie, które dobrze żeby były. " +
             "Kilka takich spełnionych wymagań w projekcie może zwiększyć zadowolenie klienta przy równoczesnym niskim koszcie ich dostarczenia.\n" +
             "4) Will not - informacje, które w chwilii obecnej nie są wymagane, ale mogą się stać np. w kolejnym cyklu projektu";
-
-
+    protected ProgressBar progressBar;
+    protected TextView percentageProgress;
+    private Button sendButton;
+    private File[] files;
+    private Set<FileItem> fileItemsSet = new LinkedHashSet<>();
+    private String name;
+    private Double sizeSelectedItems;
+    private String recorderName;
+    private String meetingName;
+    private ArrayList<String> checkedFileNames = new ArrayList<>();
+    private String path;
+    private StorageArrayAdapter storageArrayAdapter;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -84,15 +82,16 @@ public class StorageActivity extends ListActivity {
         for (File file : files) {
             if (!file.getName().equals("email.txt")) {
                 String name = file.getName();
-                fileItems.add(new FileItem(name, file.length(), false));
+                fileItemsSet.add(new FileItem(name, file.length(), false));
             }
         }
 
-        ProgressUpdater pu = new ProgressUpdater(checkedFileNames, fileItems,sizeSelectedItems, progressBar, percentageProgress, path);
-        setListAdapter(new StorageArrayAdapter(this, new ArrayList<>(fileItems), pu));
+        ProgressUpdater progressUpdater = new ProgressUpdater(progressBar, percentageProgress);
+        storageArrayAdapter = new StorageArrayAdapter(this, new ArrayList<>(fileItemsSet), progressUpdater);
+        setListAdapter(storageArrayAdapter);
+
         ListView listView = getListView();
         listView.setTextFilterEnabled(true);
-
 
 
         listView.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext(), listView) {
@@ -110,7 +109,6 @@ public class StorageActivity extends ListActivity {
                     }
                 }
             }
-
 
 
             @Override
@@ -146,39 +144,32 @@ public class StorageActivity extends ListActivity {
         });
 
 
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onClick(View v) {
-                PopupMenu popup = new PopupMenu(StorageActivity.this, sendButton);
-                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+        sendButton.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(StorageActivity.this, sendButton);
+            popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    public boolean onMenuItemClick(MenuItem item) {
-                        if(item.getTitle().toString().compareToIgnoreCase("Email") == 0)
-                            sendEmail();
-                        else if(item.getTitle().toString().compareToIgnoreCase("Ftp") == 0)
-                            sendFtp();
-                        else if(item.getTitle().toString().compareToIgnoreCase("Email & FTP") == 0) {
-                            sendFtp();
-                            sendEmail();
-                        }
+            popup.setOnMenuItemClickListener(item -> {
+                if (item.getTitle().toString().compareToIgnoreCase("Email") == 0)
+                    sendEmail();
+                else if (item.getTitle().toString().compareToIgnoreCase("Ftp") == 0)
+                    sendFtp();
+                else if (item.getTitle().toString().compareToIgnoreCase("Email & FTP") == 0) {
+                    sendFtp();
+                    sendEmail();
+                }
 
-                        return true;
-                    }
-                });
+                return true;
+            });
 
-                popup.show();
-            }
+            popup.show();
         });
 
 
+    }
 
-}
-
-    private void updateCheckedList(){
+    private void updateCheckedList() {
         checkedFileNames.clear();
-        for (FileItem fileItem : fileItems) {
+        for (FileItem fileItem : fileItemsSet) {
             if (fileItem.isChecked()) {
                 checkedFileNames.add(fileItem.getName());
             }
@@ -211,20 +202,18 @@ public class StorageActivity extends ListActivity {
     private void deleteItem(File file) {
         FileItem fileItem = findFileItemInTheSetByName(file.getName());
         if (fileItem != null) {
-            fileItems.remove(fileItem);
+            fileItemsSet.remove(fileItem);
         }
         file.delete();
-        startActivity(getIntent());
-        finish();
+        storageArrayAdapter.remove(fileItem);
     }
 
-    public void deleteChecked(View view){
-
+    public void deleteChecked(View view) {
         updateCheckedList();
         File directory = new File(path);
         files = directory.listFiles();
 
-        if(checkedFileNames.size() == 0)
+        if (checkedFileNames.size() == 0)
             Toast.makeText(getApplicationContext(), "Zaznacz pliki do usunięcia", Toast.LENGTH_LONG).show();
 
         for (File file : files) {
@@ -259,16 +248,8 @@ public class StorageActivity extends ListActivity {
 
     }
 
-    private void selectCheckBoxes(List<String> checkedFileNames) {
-        for (FileItem fileItem : fileItems) {
-            if (checkedFileNames.contains(fileItem.getName())) {
-                fileItem.setChecked(true);
-            }
-        }
-    }
-
     private FileItem findFileItemInTheSetByName(String name) {
-        for (FileItem fileItem : fileItems) {
+        for (FileItem fileItem : fileItemsSet) {
             if (fileItem.getName().equals(name)) {
                 return fileItem;
             }
@@ -289,7 +270,7 @@ public class StorageActivity extends ListActivity {
             }
         }
 
-        if(sizeSelectedItems <= 10000000) {
+        if (sizeSelectedItems <= 10000000) {
 
             updateCheckedList();
             ArrayList<Uri> filesUri = new ArrayList<>();
@@ -315,7 +296,7 @@ public class StorageActivity extends ListActivity {
 
             List<String> addresses = new ArrayList<>();
             if (file.exists()) {
-                mailSubject = in.nextLine();
+                String mailSubject = in.nextLine();
                 while (in.hasNext()) {
                     addresses.add(in.nextLine());
                 }
@@ -335,16 +316,14 @@ public class StorageActivity extends ListActivity {
                 email.setType("message/rfc822");
                 startActivity(Intent.createChooser(email, "Choose an Email client :"));
             }
-        }
-        else
-        {
+        } else {
             Toast.makeText(getApplicationContext(), "Rozmiar zaznaczonych plików większy niż 10 MB.", Toast.LENGTH_SHORT).show();
         }
     }
 
 
-    private void sendFtp(){
-        SharedPreferences sharedPref= getSharedPreferences("defaultFTP.xml", 0);
+    private void sendFtp() {
+        SharedPreferences sharedPref = getSharedPreferences("defaultFTP.xml", 0);
         FTP ftp = new FTP(sharedPref.getString("Custom_hostname", getString(R.string.default_hostname)),
                 sharedPref.getString("Custom_login", getString(R.string.default_login)),
                 sharedPref.getString("Custom_password", getString(R.string.default_password)),
@@ -352,16 +331,24 @@ public class StorageActivity extends ListActivity {
                 recorderName,
                 meetingName);
         ftp.execute();
-        Toast.makeText(StorageActivity.this,"Wysłano na serwer FTP.",Toast.LENGTH_SHORT).show();
+        Toast.makeText(StorageActivity.this, "Wysłano na serwer FTP.", Toast.LENGTH_SHORT).show();
     }
 
+
+    public void checkAll(View view) {
+        for (FileItem fileItem : fileItemsSet) {
+            fileItem.setChecked(true);
+        }
+        storageArrayAdapter.clear();
+        storageArrayAdapter.addAll(fileItemsSet);
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             Intent data = new Intent();
             checkedFileNames = new ArrayList<>();
-            for (FileItem fileItem : fileItems) {
+            for (FileItem fileItem : fileItemsSet) {
                 if (fileItem.isChecked()) {
                     checkedFileNames.add(fileItem.getName());
                 }
@@ -371,4 +358,5 @@ public class StorageActivity extends ListActivity {
         }
         return super.onKeyDown(keyCode, event);
     }
+
 }

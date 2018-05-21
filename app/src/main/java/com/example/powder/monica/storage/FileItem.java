@@ -6,10 +6,10 @@ import java.io.File;
 
 public class FileItem {
     private String name;
-    private long size;
+    private double size;
     private boolean checked;
 
-    public FileItem(String name, long size, boolean checked) {
+    public FileItem(String name, double size, boolean checked) {
         this.name = name;
         this.checked = checked;
         this.size = size;
@@ -39,6 +39,10 @@ public class FileItem {
     @Override
     public int hashCode() {
         return name.hashCode();
+    }
+
+    public Double getSize() {
+        return size;
     }
 }
 

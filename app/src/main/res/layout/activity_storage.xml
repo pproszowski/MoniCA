@@ -19,7 +19,7 @@
         app:layout_constraintEnd_toStartOf="@+id/send_popup"
         app:layout_constraintHorizontal_bias="0.349"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+        app:layout_constraintTop_toBottomOf="@+id/maxSizeText" />
 
     <Button
         android:id="@+id/send_popup"
@@ -33,7 +33,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView8"
+        android:id="@+id/maxSizeText"
         android:layout_width="92dp"
         android:layout_height="16dp"
         android:layout_marginStart="8dp"
@@ -47,7 +47,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="2dp"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
+        app:layout_constraintBottom_toTopOf="@+id/storageButtonsLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -60,11 +60,11 @@
         android:layout_marginStart="4dp"
         android:layout_marginTop="16dp"
         android:text="0kB"
-        app:layout_constraintStart_toEndOf="@+id/textView8"
+        app:layout_constraintStart_toEndOf="@+id/maxSizeText"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:id="@+id/linearLayout3"
+        android:id="@+id/storageButtonsLayout"
         android:layout_width="0dp"
         android:layout_height="42dp"
         android:layout_marginBottom="2dp"
@@ -73,11 +73,10 @@
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/listView2">
+        app:layout_constraintStart_toStartOf="parent" >
 
         <Button
-            android:id="@+id/button11"
+            android:id="@+id/deleteCheckedButton"
             android:layout_width="99dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -85,7 +84,8 @@
             android:text="@string/delete" />
 
         <Button
-            android:id="@+id/button12"
+            android:id="@+id/checkAllButton"
+            android:onClick="checkAll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

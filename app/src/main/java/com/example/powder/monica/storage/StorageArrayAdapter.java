@@ -8,38 +8,43 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.powder.monica.AppLog;
 import com.example.powder.monica.R;
 
-import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
     private LayoutInflater inflater;
-    private ProgressUpdater pu;
+    private ProgressUpdater progressUpdater;
+    private List<FileItem> fileItems;
 
-    public StorageArrayAdapter(Context context, List<FileItem> fileItems, ProgressUpdater pu){
+    public StorageArrayAdapter(Context context, List<FileItem> fileItems, ProgressUpdater progressUpdater){
         super(context, R.layout.row_layout, R.id.itemTextView, fileItems);
         inflater = LayoutInflater.from(context);
-        this.pu = pu;
+        this.progressUpdater = progressUpdater;
+        this.fileItems = fileItems;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        AppLog.logString(">>>>>>>>>>>>>>>>>>GET VIEW" + getSizeOfSelectedFiles());
         FileItem fileItem = this.getItem(position);
         CheckBox checkBox;
         TextView textView;
         convertView = inflater.inflate(R.layout.row_layout, null);
         textView = convertView.findViewById(R.id.itemTextView);
         checkBox = convertView.findViewById(R.id.itemCheckBox);
+
         checkBox.setOnClickListener(v -> {
             CheckBox cb = (CheckBox) v;
             FileItem fi = (FileItem) cb.getTag();
             fi.setChecked(cb.isChecked());
-            pu.updateProgress();
+            progressUpdater.updateProgress(getSizeOfSelectedFiles());
         });
 
+        progressUpdater.updateProgress(getSizeOfSelectedFiles());
         checkBox.setTag(fileItem);
         checkBox.setChecked(fileItem.isChecked());
         textView.setText(fileItem.getName());
@@ -54,5 +59,15 @@ public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
 
 
         return convertView;
+    }
+
+    private Double getSizeOfSelectedFiles() {
+        Double size = Double.valueOf(0);
+        for(FileItem fileItem : fileItems){
+            if(fileItem.isChecked()){
+                size += fileItem.getSize();
+            }
+        }
+        return size;
     }
 }
