@@ -1,10 +1,12 @@
 package com.example.powder.monica;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -98,5 +100,14 @@ public class FTPSettingActivity extends Activity {
         });
     }
 
-
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Intent mainMenuIntent = new Intent(this, MainMenuActivity.class);
+            startActivity(mainMenuIntent);
+            overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 }

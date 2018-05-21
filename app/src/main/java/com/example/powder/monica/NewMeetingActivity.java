@@ -1,29 +1,26 @@
 package com.example.powder.monica;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-import java.util.Scanner;
-import java.util.jar.Attributes;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class NewMeetingActivity extends AppCompatActivity {
 
+    public final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+    String[] emailString;
     private Button confirmButton;
     private TextInputEditText meetingName;
     private File file;
@@ -32,13 +29,11 @@ public class NewMeetingActivity extends AppCompatActivity {
     private TextInputEditText inputEmail;
     private String recorderName;
     private String mailSubject;
-    String[] emailString;
     private String path;
-    public final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
-    private String deleteUntilComma(String str){
-        while(str.charAt(str.length()-1)!=','){
-            str=str.substring(0,str.length()-1);
+    private String deleteUntilComma(String str) {
+        while (str.charAt(str.length() - 1) != ',') {
+            str = str.substring(0, str.length() - 1);
         }
         return str;
     }
@@ -57,20 +52,23 @@ public class NewMeetingActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
 
 
-                if((inputEmail.getText().toString().length() - inputEmail.getText().toString().replace(",", "").length()) >=20 ) {
+                if ((inputEmail.getText().toString().length() - inputEmail.getText().toString().replace(",", "").length()) >= 20) {
                     Toast.makeText(getApplicationContext(), "Osiągnięto limit 20 e-maili", Toast.LENGTH_SHORT).show();
-                    if(inputEmail.getText().toString().charAt(inputEmail.length()-1)==','){
-                        inputEmail.setText(inputEmail.getText().toString().substring(0,inputEmail.length()-1));
+                    if (inputEmail.getText().toString().charAt(inputEmail.length() - 1) == ',') {
+                        inputEmail.setText(inputEmail.getText().toString().substring(0, inputEmail.length() - 1));
                         inputEmail.setSelection(inputEmail.length());
 
-                    }else {
+                    } else {
                         inputEmail.setText(deleteUntilComma(inputEmail.getText().toString()));
                         inputEmail.setSelection(inputEmail.length());
                     }
                 }
-            }public void beforeTextChanged(CharSequence s, int start,
-                                           int count, int after) {
             }
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
             public void onTextChanged(CharSequence s, int start,
                                       int before, int count) {
             }
@@ -78,11 +76,10 @@ public class NewMeetingActivity extends AppCompatActivity {
 
         confirmButton.setOnClickListener((view) -> {
 
-                    emailString=inputEmail.getText().toString().split(",", 20);
-                        for(String email:emailString)
-                    {
-                        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(email);
-                        if(!matcher.matches()) {
+                    emailString = inputEmail.getText().toString().split(",", 20);
+                    for (String email : emailString) {
+                        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
+                        if (!matcher.matches()) {
                             Toast.makeText(getApplicationContext(), "Podaj poprawny email", Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -90,7 +87,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 
                     path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName;
                     directory = new File(path);
-                    if(directory.exists()) {
+                    if (directory.exists()) {
                         File[] files = directory.listFiles();
 
                         for (File file : files) {
@@ -101,10 +98,10 @@ public class NewMeetingActivity extends AppCompatActivity {
                         }
                     }
 
-                        if (meetingName.getText().length() == 0) {
-                            Toast.makeText(getApplicationContext(), "Nazwa spotkania nie może być pusta!", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
+                    if (meetingName.getText().length() == 0) {
+                        Toast.makeText(getApplicationContext(), "Nazwa spotkania nie może być pusta!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     mailSubject = meetingName.getText() + " "
                             + Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + "/"
                             + (Calendar.getInstance().get(Calendar.MONTH) + 1) + "/"
