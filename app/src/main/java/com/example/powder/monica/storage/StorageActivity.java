@@ -11,25 +11,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.RequiresApi;
-import android.support.constraint.ConstraintLayout;
-import android.text.Layout;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -186,6 +176,14 @@ public class StorageActivity extends ListActivity {
 
 }
 
+    private void updateCheckedList(){
+        checkedFileNames.clear();
+        for (FileItem fileItem : fileItems) {
+            if (fileItem.isChecked()) {
+                checkedFileNames.add(fileItem.getName());
+            }
+        }
+    }
 
     private void openImage(File file, Context context) {
         final Intent intent = new Intent(Intent.ACTION_VIEW)
@@ -218,6 +216,23 @@ public class StorageActivity extends ListActivity {
         file.delete();
         startActivity(getIntent());
         finish();
+    }
+
+    public void deleteChecked(View view){
+
+        updateCheckedList();
+        File directory = new File(path);
+        files = directory.listFiles();
+
+        if(checkedFileNames.size() == 0)
+            Toast.makeText(getApplicationContext(), "Zaznacz pliki do usunięcia", Toast.LENGTH_LONG).show();
+
+        for (File file : files) {
+            if (checkedFileNames.contains(file.getName())) {
+                deleteItem(file);
+            }
+        }
+
     }
 
     private void addArchive(File[] files, String path) {
@@ -274,14 +289,8 @@ public class StorageActivity extends ListActivity {
         }
 
         if(sizeSelectedItems <= 10000000) {
-            checkedFileNames.clear();
-            for (FileItem fileItem : fileItems) {
-                if (fileItem.isChecked()) {
-                    checkedFileNames.add(fileItem.getName());
-                }
-            }
 
-
+            updateCheckedList();
             ArrayList<Uri> filesUri = new ArrayList<>();
             directory = new File(path);
 
