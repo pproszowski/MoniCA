@@ -61,6 +61,16 @@ public class StorageActivity extends ListActivity {
     private String path;
     private StorageArrayAdapter storageArrayAdapter;
     private Button checkAllButton;
+    private myBoolean checkedAll;
+    protected class myBoolean {
+        private Boolean aBoolean = Boolean.FALSE;
+        public void setValue(boolean aBoolean){
+            this.aBoolean = aBoolean;
+        }
+        public Boolean getValue(){
+            return aBoolean;
+        }
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -76,6 +86,8 @@ public class StorageActivity extends ListActivity {
         //sizeSelectedItems = getIntent().getExtras().getDouble("sizeSelectedItems");
         recorderName = getIntent().getExtras().getString("recorderName");
         meetingName = getIntent().getExtras().getString("meetingName");
+        checkedAll = new myBoolean();
+
 
 
         path = Environment.getExternalStorageDirectory().getPath()
@@ -92,7 +104,7 @@ public class StorageActivity extends ListActivity {
         }
 
         ProgressUpdater progressUpdater = new ProgressUpdater(progressBar, percentageProgress);
-        storageArrayAdapter = new StorageArrayAdapter(this, new ArrayList<>(fileItemsSet), progressUpdater);
+        storageArrayAdapter = new StorageArrayAdapter(this, new ArrayList<>(fileItemsSet), progressUpdater, checkAllButton, checkedAll);
         setListAdapter(storageArrayAdapter);
 
         ListView listView = getListView();
@@ -338,21 +350,20 @@ public class StorageActivity extends ListActivity {
         Toast.makeText(StorageActivity.this, "Wysłano na serwer FTP.", Toast.LENGTH_SHORT).show();
     }
 
-    private boolean checkedAll = false;
 
     public void checkAll(View view) {
-
-        if (checkedAll) {
+        Log.i("^^^^^^Storage", checkedAll.toString());
+        if (checkedAll.getValue()) {
             for (FileItem fileItem : fileItemsSet) {
                 fileItem.setChecked(false);
             }
-            checkedAll = false;
+            checkedAll.setValue(false);
             checkAllButton.setText("Check All");
         } else {
             for (FileItem fileItem : fileItemsSet) {
                 fileItem.setChecked(true);
             }
-            checkedAll = true;
+            checkedAll.setValue(true);
             checkAllButton.setText("Uncheck All");
         }
 

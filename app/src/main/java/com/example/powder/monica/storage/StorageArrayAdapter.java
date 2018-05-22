@@ -1,10 +1,12 @@
 package com.example.powder.monica.storage;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,12 +21,16 @@ public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
     private LayoutInflater inflater;
     private ProgressUpdater progressUpdater;
     private List<FileItem> fileItems;
+    private Button checkAllButton;
+    private StorageActivity.myBoolean checkedAll;
 
-    public StorageArrayAdapter(Context context, List<FileItem> fileItems, ProgressUpdater progressUpdater){
+    public StorageArrayAdapter(Context context, List<FileItem> fileItems, ProgressUpdater progressUpdater, Button checkAllButton, StorageActivity.myBoolean checkedAll){
         super(context, R.layout.row_layout, R.id.itemTextView, fileItems);
         inflater = LayoutInflater.from(context);
         this.progressUpdater = progressUpdater;
         this.fileItems = fileItems;
+        this.checkAllButton = checkAllButton;
+        this.checkedAll = checkedAll;
     }
 
     @Override
@@ -42,7 +48,21 @@ public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
             FileItem fi = (FileItem) cb.getTag();
             fi.setChecked(cb.isChecked());
             progressUpdater.updateProgress(getSizeOfSelectedFiles());
+
+            if(fileItems.size() == getNumberOfSelectedFiles()){
+                checkedAll.setValue(true);
+                checkAllButton.setText("Uncheck All");
+            }
+            else
+            {
+                checkedAll.setValue(false);
+                checkAllButton.setText("Check All");
+            }
+
         });
+
+
+
 
         progressUpdater.updateProgress(getSizeOfSelectedFiles());
         checkBox.setTag(fileItem);
@@ -70,4 +90,15 @@ public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
         }
         return size;
     }
+
+    private Integer getNumberOfSelectedFiles() {
+        Integer number = Integer.valueOf(0);
+        for(FileItem fileItem : fileItems){
+            if(fileItem.isChecked()){
+                number++;
+            }
+        }
+        return number;
+    }
+
 }
