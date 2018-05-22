@@ -20,6 +20,9 @@ public class OpenExistingMeetingActivity extends ListActivity{
         recorderName = getIntent().getExtras().getString("recorderName");
         String path = Environment.getExternalStorageDirectory().getPath() +"/"+recorderName;
         File file = new File(path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
         String[] meetings = file.list((dir, name) -> new File(dir, name).isDirectory());
 
         setListAdapter(new ArrayAdapter<>(this, R.layout.activity_meetings,Arrays.asList(meetings)));
