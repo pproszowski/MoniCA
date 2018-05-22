@@ -127,7 +127,7 @@ public class NewMeetingActivity extends AppCompatActivity {
                         writer.println(inputEmail.getText().toString());
                         writer.close();
                     }
-                    Intent newIntent = new Intent(NewMeetingActivity.this, AudioOnTouchActivity.class);
+                    Intent newIntent = new Intent(NewMeetingActivity.this, CurrentMeetingActivity.class);
                     newIntent.putExtra("Name", meetingName.getText().toString());
                     newIntent.putExtra("recorderName", recorderName.toString());
                     newIntent.putExtra("mailSubject", mailSubject.toString());

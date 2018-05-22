@@ -14,9 +14,17 @@ public class ProgressUpdater {
     }
 
     public void updateProgress(Double sizeSelectedItems) {
+        Double sizeConverted;
         Integer size = new Integer(sizeSelectedItems.intValue());
-        Double sizekB = sizeSelectedItems / 1000;
+        if(size <= 1048576){
+            sizeConverted = sizeSelectedItems / 1024;
+            percentageProgress.setText(String.format("%.2fkB / 10MB", sizeConverted));
+        }
+        else {
+            sizeConverted = sizeSelectedItems / 1048576;
+            percentageProgress.setText(String.format("%.2fMB / 10MB", sizeConverted));
+        }
         progressBar.setProgress(size / 100000);
-        percentageProgress.setText(String.format("%.2fkB", sizekB));
+
     }
 }

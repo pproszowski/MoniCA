@@ -27,7 +27,7 @@ public class OpenExistingMeetingActivity extends ListActivity{
         listView.setTextFilterEnabled(true);
 
         listView.setOnItemClickListener((parent, view, position, id) -> {
-            Intent onTouchActivity = new Intent(OpenExistingMeetingActivity.this, AudioOnTouchActivity.class);
+            Intent onTouchActivity = new Intent(OpenExistingMeetingActivity.this, CurrentMeetingActivity.class);
             onTouchActivity.putExtra("recorderName", recorderName);
             onTouchActivity.putExtra("Name", meetings[position]);
             startActivity(onTouchActivity);

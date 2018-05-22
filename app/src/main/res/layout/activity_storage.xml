@@ -55,11 +55,13 @@
 
     <TextView
         android:id="@+id/percProgress"
-        android:layout_width="77dp"
+        android:layout_width="0dp"
         android:layout_height="17dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginStart="4dp"
         android:layout_marginTop="16dp"
         android:text="0kB"
+        app:layout_constraintEnd_toStartOf="@+id/send_popup"
         app:layout_constraintStart_toEndOf="@+id/maxSizeText"
         app:layout_constraintTop_toTopOf="parent" />
 

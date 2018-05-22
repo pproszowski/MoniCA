@@ -1,26 +1,19 @@
 package com.example.powder.monica;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
-import java.util.Scanner;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -28,16 +21,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.SeekBar;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.powder.monica.storage.StorageActivity;
 
 
-public class AudioOnTouchActivity extends AppCompatActivity {
+public class CurrentMeetingActivity extends AppCompatActivity {
     private TouchableButton recordButton;
     private TextView recordingStatus;
     private TextView sizeText;
@@ -80,7 +70,7 @@ public class AudioOnTouchActivity extends AppCompatActivity {
             case R.id.ftp_settings_action_bar: {
 
 
-                startActivity(new Intent(AudioOnTouchActivity.this, FTPSettingActivity.class));
+                startActivity(new Intent(CurrentMeetingActivity.this, FTPSettingActivity.class));
                 return true;
             }
 
@@ -98,7 +88,7 @@ public class AudioOnTouchActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_audio_on_touch);
+        setContentView(R.layout.activity_current_meeting);
         recorderName = getIntent().getExtras().getString("recorderName");
         meetingName = getIntent().getExtras().getString("Name");
         mailSubject = getIntent().getExtras().getString("mailSubject");
@@ -178,7 +168,12 @@ public class AudioOnTouchActivity extends AppCompatActivity {
                 size += file.length();
             }
         }
-        sizeText.setText(String.format("Size : %sKB", size / 1000));
+        if(size <= 1048576){
+            sizeText.setText(String.format("Size : %.2fKB", size / 1024));
+        }
+        else {
+            sizeText.setText(String.format("Size : %.2fMB", size / 1048576));
+        }
     }
 
     private String getFilename() {
@@ -224,7 +219,12 @@ public class AudioOnTouchActivity extends AppCompatActivity {
             recorder.stop();
             size += new File(recordedFileName).length();
             recordingStatus.setText("Record saved!" );
-            sizeText.setText(String.format("Size : %sKB", size / 1000));
+            if(size <= 1048576){
+                sizeText.setText(String.format("Size : %.2fKB", size / 1024));
+            }
+            else {
+                sizeText.setText(String.format("Size : %.2fMB", size / 1048576));
+            }
         } catch (RuntimeException e) {
             recordingStatus.setText(R.string.record_too_short);
             File file = new File(recordedFileName);

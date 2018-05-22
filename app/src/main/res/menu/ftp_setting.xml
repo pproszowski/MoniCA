@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".AudioOnTouchActivity">
+    tools:context=".CurrentMeetingActivity">
     <item
         android:id="@+id/ftp_settings_action_bar"
         android:title="FTPSettings"

@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
+import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +36,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+
+import static com.example.powder.monica.R.id.checkAllButton;
 
 
 public class StorageActivity extends ListActivity {
@@ -57,6 +60,7 @@ public class StorageActivity extends ListActivity {
     private ArrayList<String> checkedFileNames = new ArrayList<>();
     private String path;
     private StorageArrayAdapter storageArrayAdapter;
+    private Button checkAllButton;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -66,6 +70,7 @@ public class StorageActivity extends ListActivity {
         sendButton = (Button) findViewById(R.id.send_popup);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         percentageProgress = (TextView) findViewById(R.id.percProgress);
+        checkAllButton = (Button) findViewById(R.id.checkAllButton);
         overridePendingTransition(0, 0);
         name = getIntent().getExtras().getString("Name");
         //sizeSelectedItems = getIntent().getExtras().getDouble("sizeSelectedItems");
@@ -260,8 +265,8 @@ public class StorageActivity extends ListActivity {
 
     private void sendEmail() {
 
+        updateCheckedList();
         sizeSelectedItems = 0.0;
-        Log.i("^^^^^^^^^^^^^^", path.toString());
         File directory = new File(path);
         File[] files = directory.listFiles();
         for (File file : files) {
@@ -270,9 +275,8 @@ public class StorageActivity extends ListActivity {
             }
         }
 
-        if (sizeSelectedItems <= 10000000) {
+        if (sizeSelectedItems <= 10485760) {
 
-            updateCheckedList();
             ArrayList<Uri> filesUri = new ArrayList<>();
             directory = new File(path);
 
@@ -334,13 +338,27 @@ public class StorageActivity extends ListActivity {
         Toast.makeText(StorageActivity.this, "Wysłano na serwer FTP.", Toast.LENGTH_SHORT).show();
     }
 
+    private boolean checkedAll = false;
 
     public void checkAll(View view) {
-        for (FileItem fileItem : fileItemsSet) {
-            fileItem.setChecked(true);
+
+        if (checkedAll) {
+            for (FileItem fileItem : fileItemsSet) {
+                fileItem.setChecked(false);
+            }
+            checkedAll = false;
+            checkAllButton.setText("Check All");
+        } else {
+            for (FileItem fileItem : fileItemsSet) {
+                fileItem.setChecked(true);
+            }
+            checkedAll = true;
+            checkAllButton.setText("Uncheck All");
         }
+
         storageArrayAdapter.clear();
         storageArrayAdapter.addAll(fileItemsSet);
+
     }
 
     @Override
