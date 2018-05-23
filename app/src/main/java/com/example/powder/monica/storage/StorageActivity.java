@@ -352,6 +352,7 @@ public class StorageActivity extends ListActivity {
 
 
     public void checkAll(View view) {
+        if(fileItemsSet.isEmpty()) return;
         Log.i("^^^^^^Storage", checkedAll.toString());
         if (checkedAll.getValue()) {
             for (FileItem fileItem : fileItemsSet) {
