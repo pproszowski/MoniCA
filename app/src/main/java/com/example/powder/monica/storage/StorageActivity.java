@@ -11,16 +11,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
-import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,8 +33,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
-
-import static com.example.powder.monica.R.id.checkAllButton;
 
 
 public class StorageActivity extends ListActivity {
@@ -62,15 +57,6 @@ public class StorageActivity extends ListActivity {
     private StorageArrayAdapter storageArrayAdapter;
     private Button checkAllButton;
     private myBoolean checkedAll;
-    protected class myBoolean {
-        private Boolean aBoolean = Boolean.FALSE;
-        public void setValue(boolean aBoolean){
-            this.aBoolean = aBoolean;
-        }
-        public Boolean getValue(){
-            return aBoolean;
-        }
-    }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -81,13 +67,11 @@ public class StorageActivity extends ListActivity {
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         percentageProgress = (TextView) findViewById(R.id.percProgress);
         checkAllButton = (Button) findViewById(R.id.checkAllButton);
-        overridePendingTransition(0, 0);
         name = getIntent().getExtras().getString("Name");
         //sizeSelectedItems = getIntent().getExtras().getDouble("sizeSelectedItems");
         recorderName = getIntent().getExtras().getString("recorderName");
         meetingName = getIntent().getExtras().getString("meetingName");
         checkedAll = new myBoolean();
-
 
 
         path = Environment.getExternalStorageDirectory().getPath()
@@ -235,11 +219,9 @@ public class StorageActivity extends ListActivity {
 
         for (File file : files) {
             if (checkedFileNames.contains(file.getName())) {
-                file.delete();
+                deleteItem(file);
             }
         }
-        startActivity(getIntent());
-        finish();
     }
 
     private void addArchive(File[] files, String path) {
@@ -273,7 +255,6 @@ public class StorageActivity extends ListActivity {
         }
         return null;
     }
-
 
     private void sendEmail() {
 
@@ -337,7 +318,6 @@ public class StorageActivity extends ListActivity {
         }
     }
 
-
     private void sendFtp() {
         SharedPreferences sharedPref = getSharedPreferences("defaultFTP.xml", 0);
         FTP ftp = new FTP(sharedPref.getString("Custom_hostname", getString(R.string.default_hostname)),
@@ -350,10 +330,8 @@ public class StorageActivity extends ListActivity {
         Toast.makeText(StorageActivity.this, "Wysłano na serwer FTP.", Toast.LENGTH_SHORT).show();
     }
 
-
     public void checkAll(View view) {
-        if(fileItemsSet.isEmpty()) return;
-        Log.i("^^^^^^Storage", checkedAll.toString());
+        if (fileItemsSet.isEmpty()) return;
         if (checkedAll.getValue()) {
             for (FileItem fileItem : fileItemsSet) {
                 fileItem.setChecked(false);
@@ -370,7 +348,6 @@ public class StorageActivity extends ListActivity {
 
         storageArrayAdapter.clear();
         storageArrayAdapter.addAll(fileItemsSet);
-
     }
 
     @Override
@@ -387,6 +364,18 @@ public class StorageActivity extends ListActivity {
             setResult(RESULT_OK, data);
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    protected class myBoolean {
+        private Boolean aBoolean = Boolean.FALSE;
+
+        public Boolean getValue() {
+            return aBoolean;
+        }
+
+        public void setValue(boolean aBoolean) {
+            this.aBoolean = aBoolean;
+        }
     }
 
 }
