@@ -17,8 +17,7 @@
         <activity
             android:name=".CurrentMeetingActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.ActionBar"
-            />
+            android:theme="@style/AppTheme.ActionBar" />
         <activity
             android:name=".MainMenuActivity"
             android:screenOrientation="portrait"
@@ -35,16 +34,11 @@
             android:theme="@style/AppTheme" />
         <activity android:name=".NewMeetingActivity" />
         <activity
-            android:name=".OpenExistingMeetingActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".MakePhoto"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".FTPSettingActivity"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -56,7 +50,11 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-
+        <activity android:name=".MeetingsListActivity">
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
     </application>
 
 </manifest>

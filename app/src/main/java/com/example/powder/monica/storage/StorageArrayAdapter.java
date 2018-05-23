@@ -1,7 +1,6 @@
 package com.example.powder.monica.storage;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,6 @@ import android.widget.TextView;
 import com.example.powder.monica.AppLog;
 import com.example.powder.monica.R;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
@@ -25,7 +23,7 @@ public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
     private StorageActivity.myBoolean checkedAll;
 
     public StorageArrayAdapter(Context context, List<FileItem> fileItems, ProgressUpdater progressUpdater, Button checkAllButton, StorageActivity.myBoolean checkedAll){
-        super(context, R.layout.row_layout, R.id.itemTextView, fileItems);
+        super(context, R.layout.file_item, R.id.itemTextView, fileItems);
         inflater = LayoutInflater.from(context);
         this.progressUpdater = progressUpdater;
         this.fileItems = fileItems;
@@ -39,7 +37,7 @@ public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
         FileItem fileItem = this.getItem(position);
         CheckBox checkBox;
         TextView textView;
-        convertView = inflater.inflate(R.layout.row_layout, null);
+        convertView = inflater.inflate(R.layout.file_item, null);
         textView = convertView.findViewById(R.id.itemTextView);
         checkBox = convertView.findViewById(R.id.itemCheckBox);
 

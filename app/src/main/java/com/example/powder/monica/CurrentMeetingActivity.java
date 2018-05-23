@@ -325,7 +325,7 @@ public class CurrentMeetingActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            Intent openExistingMeetingIntent = new Intent(this, OpenExistingMeetingActivity.class);
+            Intent openExistingMeetingIntent = new Intent(this, MeetingsListActivity.class);
             openExistingMeetingIntent.putExtra("recorderName", recorderName);
             startActivity(openExistingMeetingIntent);
             overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);

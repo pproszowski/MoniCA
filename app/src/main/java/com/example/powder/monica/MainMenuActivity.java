@@ -35,7 +35,7 @@ public class MainMenuActivity extends AppCompatActivity {
         });
 
         buttonOpen.setOnClickListener(view -> {
-            Intent openExistingMeetingActivity = new Intent(MainMenuActivity.this, OpenExistingMeetingActivity.class);
+            Intent openExistingMeetingActivity = new Intent(MainMenuActivity.this, MeetingsListActivity.class);
             openExistingMeetingActivity.putExtra("recorderName", recorderName);
             startActivity(openExistingMeetingActivity);
         });
