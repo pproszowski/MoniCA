@@ -9,8 +9,7 @@
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/meetingNameInputLayout"
-        >
+        android:id="@+id/meetingNameInputLayout" >
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/meetingNameInput"
@@ -23,8 +22,7 @@
         android:id="@+id/emailInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/meetingNameInputLayout"
-        >
+        app:layout_constraintTop_toBottomOf="@id/meetingNameInputLayout" >
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/emailInput"
