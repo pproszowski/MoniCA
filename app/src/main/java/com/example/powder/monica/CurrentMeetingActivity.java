@@ -283,30 +283,22 @@ public class CurrentMeetingActivity extends AppCompatActivity {
     public void setPriority(int progress) {
         switch (progress) {
             case 0:
-                setChosenPriority(willNotText, couldText);
+                setChosenPriority(willNotText, couldText, shouldText, mustText);
                 choosenPriority = "WillNot ";
                 break;
 
             case 1:
-                if(Objects.equals("WillNot ", choosenPriority)){
-                    setChosenPriority(couldText, willNotText);
-                }else{
-                    setChosenPriority(couldText, shouldText);
-                }
+                setChosenPriority(couldText, willNotText, shouldText, mustText);
                 choosenPriority = "Could ";
                 break;
 
             case 2:
-                if(Objects.equals("Could ", choosenPriority)){
-                    setChosenPriority(shouldText, couldText);
-                }else{
-                    setChosenPriority(shouldText, mustText);
-                }
+                setChosenPriority(shouldText, mustText, couldText, willNotText);
                 choosenPriority = "Should ";
                 break;
 
             case 3:
-                setChosenPriority(mustText, shouldText);
+                setChosenPriority(mustText, shouldText, willNotText, couldText);
                 choosenPriority = "Must ";
                 break;
             default:
@@ -314,12 +306,17 @@ public class CurrentMeetingActivity extends AppCompatActivity {
         }
     }
 
-    private void setChosenPriority(TextView chosenPriority, TextView previous){
+    private void setChosenPriority(TextView chosenPriority, TextView a, TextView b, TextView c){
         chosenPriority.setTypeface(null, Typeface.BOLD);
-        previous.setTypeface(null, Typeface.NORMAL);
-
         chosenPriority.setTextSize(16);
-        previous.setTextSize(14);
+
+        a.setTypeface(null, Typeface.NORMAL);
+        a.setTextSize(14);
+        b.setTypeface(null, Typeface.NORMAL);
+        b.setTextSize(14);
+        c.setTypeface(null, Typeface.NORMAL);
+        c.setTextSize(14);
+
     }
 
     @Override
