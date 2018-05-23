@@ -116,13 +116,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <com.example.powder.monica.TouchableButton
+        <ImageButton
             android:id="@+id/recordButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_margin="5dp"
-            android:background="@drawable/record_button_selector"
-            android:text="@string/record" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            app:srcCompat="@drawable/ic_mic_gray" />
 
         <ImageButton
             android:layout_width="wrap_content"

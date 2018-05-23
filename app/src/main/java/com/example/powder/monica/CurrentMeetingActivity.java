@@ -21,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -28,7 +29,7 @@ import com.example.powder.monica.storage.StorageActivity;
 
 
 public class CurrentMeetingActivity extends AppCompatActivity {
-    private TouchableButton recordButton;
+    private ImageButton recordButton;
     private TextView recordingStatus;
     private TextView sizeText;
     private TextView sizeOfSelectedItemsText;
@@ -113,11 +114,13 @@ public class CurrentMeetingActivity extends AppCompatActivity {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     recordingStatus.setText(R.string.recording);
+                    ((ImageButton) v).setImageResource(R.drawable.ic_mic_red);
                     AppLog.logString("Start Recording");
                     startRecording();
                     break;
                 case MotionEvent.ACTION_UP:
                     AppLog.logString("Stop Recording");
+                    ((ImageButton) v).setImageResource(R.drawable.ic_mic_gray);
                     stopRecording();
                     break;
             }
