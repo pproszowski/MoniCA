@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -13,6 +15,7 @@ import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -114,24 +117,57 @@ public class MakePhoto extends Activity {
     }
 
     protected void compressImage(File newNameFile) throws IOException {
-        File imgFileOrig = newNameFile;
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        Bitmap b = BitmapFactory.decodeFile(imgFileOrig.getAbsolutePath(), options);
+        try {
+            File f = newNameFile;
+            ExifInterface exif = new ExifInterface(f.getPath());
+            int orientation = exif.getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL);
 
-        final int destWidth = 1366;
-        final int destHeight = 768;
+            int angle = 0;
 
-        Bitmap b2 = Bitmap.createScaledBitmap(b, destWidth, destHeight, false);
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        b2.compress(Bitmap.CompressFormat.JPEG, 85, outStream);
-        File f = new File(Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName, newNameFile.getName());
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+                angle = 90;
+            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+                angle = 180;
+            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                angle = 270;
+            }
+
+            Matrix mat = new Matrix();
+            mat.postRotate(angle);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 2;
+           Bitmap bmp = BitmapFactory.decodeStream(new FileInputStream(f),
+                   null, options);
+
+           final int destWidth = 1000;
+           final int destHeight = 1333;
+
+            Bitmap bitmap = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(),
+                    bmp.getHeight(), mat, true);
+           Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmap, destWidth, destHeight , false);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            bitmapScaled.compress(Bitmap.CompressFormat.JPEG, 80,
+                    outputStream);
+
+
+        f = new File(Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName, newNameFile.getName());
         f.createNewFile();
         FileOutputStream fo = new FileOutputStream(f);
-        fo.write(outStream.toByteArray());
+        fo.write(outputStream.toByteArray());
         fo.close();
+
+
+        } catch (IOException e) {
+            Log.w("TAG", "-- Error in setting image");
+        } catch (OutOfMemoryError oom) {
+            Log.w("TAG", "-- OOM Error in setting image");
+        }
     }
+
+
 
 }
 
