@@ -76,8 +76,8 @@ public class CurrentMeetingActivity extends AppCompatActivity {
             }
 
             case R.id.user_settings_action_bar: {
-                //TODO: create UserSettingActivity.class to connect here;
-//                startActivity(new Intent(this, UserSettingActivity.class));
+
+                startActivity(new Intent(this, UserSettingActivity.class));
                 return true;
             }
             default:
