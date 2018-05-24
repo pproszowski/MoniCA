@@ -28,13 +28,14 @@ public class UserSettingActivity extends ListActivity {
         private String mailSubject;
         private List<String> addresses;
         private int elementNumber=0;
+        private String newEmail="";
+        boolean newMail=false;
 
 
     @SuppressLint("ResourceType")
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-
             recorderName = getIntent().getExtras().getString("recorderName");
             meetingName = getIntent().getExtras().getString("Name");
             path = Environment.getExternalStorageDirectory().getPath() +"/"+recorderName+"/"+meetingName+"/email.txt";
@@ -58,17 +59,38 @@ public class UserSettingActivity extends ListActivity {
                     }
                 }
 
+                if(getIntent().getExtras().getString("email").length()>0) {
+
+                    addresses.add(getIntent().getExtras().getString("email"));
+                    getIntent().putExtra("email", "");
+                    saveEmail();
+                }
+
 
                 if (addresses.isEmpty()) {
                     Toast.makeText(getApplicationContext(), "Brak podanych maili!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
+
             setListAdapter(new ArrayAdapter<>(this,R.layout.activity_user_setting_activity,R.id.emailList, addresses));
             ListView listView = getListView();
             listView.setTextFilterEnabled(true);
 
             listView.setOnItemClickListener((parent, view, position, id) -> {
+                if(position==0)
+                {
+                    Intent intent = new Intent(this,AddEmail.class);
+                    intent.putExtra("Name", meetingName);
+                    intent.putExtra("recorderName", recorderName);
+                    intent.putExtra("email", "");
+                    startActivity(intent);
+                    finish();
+
+                }
+
+                else{
+
                 try {
                     writer = new PrintWriter(path);
                 } catch (FileNotFoundException e) {
@@ -87,12 +109,36 @@ public class UserSettingActivity extends ListActivity {
                 }
                         startActivity(getIntent());
                         finish();
-            }
+            }}
 
             );
         }
 
 
-
     }
+
+    void saveEmail()
+    {
+
+        try {
+            writer = new PrintWriter(path);
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+        if (writer != null) {
+            elementNumber=0;
+            writer.println(mailSubject);
+            for (String emailList:addresses)
+            {
+                if(elementNumber!=0)
+                    writer.println(emailList+",");
+                elementNumber++;
+            }
+            writer.close();
+        }
+        startActivity(getIntent());
+        finish();
+    }
+
+
 }

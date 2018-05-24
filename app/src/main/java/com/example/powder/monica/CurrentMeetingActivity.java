@@ -80,6 +80,7 @@ public class CurrentMeetingActivity extends AppCompatActivity {
                 Intent intent=new Intent(this, UserSettingActivity.class);
                 intent.putExtra("Name", meetingName);
                 intent.putExtra("recorderName", recorderName);
+                intent.putExtra("email", "");
                 startActivity(intent);
                 return true;
             }
