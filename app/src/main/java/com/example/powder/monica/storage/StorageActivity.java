@@ -222,9 +222,6 @@ public class StorageActivity extends ListActivity {
                 deleteItem(file);
             }
         }
-
-        startActivity(getIntent());
-        finish();
     }
 
     private void addArchive(File[] files, String path) {
