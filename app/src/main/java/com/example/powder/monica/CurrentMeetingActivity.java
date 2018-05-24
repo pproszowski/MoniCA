@@ -77,7 +77,10 @@ public class CurrentMeetingActivity extends AppCompatActivity {
 
             case R.id.user_settings_action_bar: {
 
-                startActivity(new Intent(this, UserSettingActivity.class));
+                Intent intent=new Intent(this, UserSettingActivity.class);
+                intent.putExtra("Name", meetingName);
+                intent.putExtra("recorderName", recorderName);
+                startActivity(intent);
                 return true;
             }
             default:

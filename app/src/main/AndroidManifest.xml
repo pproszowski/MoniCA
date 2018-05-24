@@ -37,6 +37,9 @@
             android:name=".MakePhoto"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".UserSettingActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".FTPSettingActivity"
             android:screenOrientation="portrait" />
 
