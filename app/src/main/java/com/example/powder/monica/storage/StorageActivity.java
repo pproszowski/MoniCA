@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.RequiresApi;
+import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -21,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.powder.monica.AppLog;
 import com.example.powder.monica.FTP;
 import com.example.powder.monica.OnSwipeTouchListener;
 import com.example.powder.monica.R;
@@ -29,13 +31,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
 
-public class StorageActivity extends ListActivity {
+public class StorageActivity extends AppCompatActivity {
     private final static String emailContent = "\nLegenda do notatek:\n" +
             "Notatki zaczynają się prefixami, które świadczą o ważności informacji\n" +
             "1) Must - oznacza krytyczne wymaganie, które musi zostać spełnione na początku, aby projekt mógł się powieść\n" +
@@ -46,7 +49,7 @@ public class StorageActivity extends ListActivity {
     protected ProgressBar progressBar;
     protected TextView percentageProgress;
     private Button sendButton;
-    private File[] files;
+    private List<File> files;
     private Set<FileItem> fileItemsSet = new LinkedHashSet<>();
     private String name;
     private Double sizeSelectedItems;
@@ -57,6 +60,7 @@ public class StorageActivity extends ListActivity {
     private StorageArrayAdapter storageArrayAdapter;
     private Button checkAllButton;
     private myBoolean checkedAll;
+    private ListView listView;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -67,8 +71,8 @@ public class StorageActivity extends ListActivity {
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         percentageProgress = (TextView) findViewById(R.id.percProgress);
         checkAllButton = (Button) findViewById(R.id.checkAllButton);
+        listView = (ListView) findViewById(R.id.storageListView);
         name = getIntent().getExtras().getString("Name");
-        //sizeSelectedItems = getIntent().getExtras().getDouble("sizeSelectedItems");
         recorderName = getIntent().getExtras().getString("recorderName");
         meetingName = getIntent().getExtras().getString("meetingName");
         checkedAll = new myBoolean();
@@ -77,7 +81,7 @@ public class StorageActivity extends ListActivity {
         path = Environment.getExternalStorageDirectory().getPath()
                 + "/AudioRecorder/" + name + "/";
         File directory = new File(path);
-        files = directory.listFiles();
+        files = Arrays.asList(directory.listFiles());
 
 
         for (File file : files) {
@@ -89,9 +93,8 @@ public class StorageActivity extends ListActivity {
 
         ProgressUpdater progressUpdater = new ProgressUpdater(progressBar, percentageProgress);
         storageArrayAdapter = new StorageArrayAdapter(this, new ArrayList<>(fileItemsSet), progressUpdater, checkAllButton, checkedAll);
-        setListAdapter(storageArrayAdapter);
+        listView.setAdapter(storageArrayAdapter);
 
-        ListView listView = getListView();
         listView.setTextFilterEnabled(true);
 
 
@@ -102,7 +105,8 @@ public class StorageActivity extends ListActivity {
                 super.onClick();
                 if (getPosition() != -1) {
                     int position = getPosition() + 1;
-                    File file = files[position];
+                    File file = files.get(position);
+                    AppLog.logString(file.getName());
                     if (file.getName().contains("jpg")) {
                         openImage(file, listView.getContext());
                     } else {
@@ -121,12 +125,12 @@ public class StorageActivity extends ListActivity {
             @Override
             public void onSwipeLeft() {
                 super.onSwipeLeft();
-                if (files.length < 2) {
+                if (files.size() < 2) {
                     return;
                 }
                 if (getPosition() != -1) {
                     int position = getPosition() + 1;
-                    File file = files[position];
+                    File file = files.get(position);
                     deleteItem(file);
                     Toast.makeText(getApplicationContext(), "Usunięto " + file.getName(), Toast.LENGTH_LONG).show();
                 }
@@ -135,7 +139,7 @@ public class StorageActivity extends ListActivity {
             @Override
             public void onSwipeRight() {
                 super.onSwipeRight();
-                if (files.length < 2) {
+                if (files.size() < 2) {
                     Toast.makeText(getApplicationContext(), "Brak plików w folderze.", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -206,16 +210,19 @@ public class StorageActivity extends ListActivity {
             fileItemsSet.remove(fileItem);
         }
         file.delete();
+        File directory = new File(path);
+        files = Arrays.asList(directory.listFiles());
         storageArrayAdapter.remove(fileItem);
     }
 
     public void deleteChecked(View view) {
         updateCheckedList();
         File directory = new File(path);
-        files = directory.listFiles();
+        files = Arrays.asList(directory.listFiles());
 
-        if (checkedFileNames.size() == 0)
+        if (checkedFileNames.size() == 0) {
             Toast.makeText(getApplicationContext(), "Zaznacz pliki do usunięcia", Toast.LENGTH_LONG).show();
+        }
 
         for (File file : files) {
             if (checkedFileNames.contains(file.getName())) {
@@ -224,7 +231,7 @@ public class StorageActivity extends ListActivity {
         }
     }
 
-    private void addArchive(File[] files, String path) {
+    private void addArchive(List<File> files, String path) {
         ZipManager archive = new ZipManager();
         List<String> fileNamesList = new ArrayList<>();
         for (File f : files) {
