@@ -3,6 +3,8 @@ package com.example.powder.monica.storage;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.List;
+
 public class ProgressUpdater {
 
     private ProgressBar progressBar;
@@ -13,7 +15,8 @@ public class ProgressUpdater {
         this.percentageProgress = percentageProgress;
     }
 
-    public void updateProgress(Double sizeSelectedItems) {
+    public void updateProgress(List<FileItem> fileItems) {
+        Double sizeSelectedItems = getSizeOfSelectedFiles(fileItems);
         Double sizeConverted;
         Integer size = new Integer(sizeSelectedItems.intValue());
         if(size <= 1048576){
@@ -26,5 +29,15 @@ public class ProgressUpdater {
         }
         progressBar.setProgress(size / 100000);
 
+    }
+
+    private Double getSizeOfSelectedFiles(List<FileItem> fileItems) {
+        Double size = 0d;
+        for (FileItem fileItem : fileItems) {
+            if (fileItem.isChecked()) {
+                size += fileItem.getSize();
+            }
+        }
+        return size;
     }
 }

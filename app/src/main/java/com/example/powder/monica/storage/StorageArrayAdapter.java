@@ -5,35 +5,28 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.powder.monica.AppLog;
 import com.example.powder.monica.R;
 
 import java.util.List;
 
-public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
+public class StorageArrayAdapter extends ArrayAdapter<FileItem> {
     private LayoutInflater inflater;
-    private ProgressUpdater progressUpdater;
     private List<FileItem> fileItems;
-    private Button checkAllButton;
-    private StorageActivity.myBoolean checkedAll;
+    private ProgressUpdater progressUpdater;
 
-    public StorageArrayAdapter(Context context, List<FileItem> fileItems, ProgressUpdater progressUpdater, Button checkAllButton, StorageActivity.myBoolean checkedAll){
+    public StorageArrayAdapter(Context context, List<FileItem> fileItems, ProgressUpdater progressUpdater) {
         super(context, R.layout.file_item, R.id.itemTextView, fileItems);
         inflater = LayoutInflater.from(context);
-        this.progressUpdater = progressUpdater;
         this.fileItems = fileItems;
-        this.checkAllButton = checkAllButton;
-        this.checkedAll = checkedAll;
+        this.progressUpdater = progressUpdater;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        AppLog.logString(">>>>>>>>>>>>>>>>>>GET VIEW" + getSizeOfSelectedFiles());
         FileItem fileItem = this.getItem(position);
         CheckBox checkBox;
         TextView textView;
@@ -45,24 +38,10 @@ public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
             CheckBox cb = (CheckBox) v;
             FileItem fi = (FileItem) cb.getTag();
             fi.setChecked(cb.isChecked());
-            progressUpdater.updateProgress(getSizeOfSelectedFiles());
-
-            if(fileItems.size() == getNumberOfSelectedFiles()){
-                checkedAll.setValue(true);
-                checkAllButton.setText("Uncheck All");
-            }
-            else
-            {
-                checkedAll.setValue(false);
-                checkAllButton.setText("Check All");
-            }
-
+            progressUpdater.updateProgress(fileItems);
         });
 
 
-
-
-        progressUpdater.updateProgress(getSizeOfSelectedFiles());
         checkBox.setTag(fileItem);
         checkBox.setChecked(fileItem.isChecked());
         textView.setText(fileItem.getName());
@@ -79,24 +58,9 @@ public class StorageArrayAdapter extends ArrayAdapter<FileItem>{
         return convertView;
     }
 
-    private Double getSizeOfSelectedFiles() {
-        Double size = Double.valueOf(0);
-        for(FileItem fileItem : fileItems){
-            if(fileItem.isChecked()){
-                size += fileItem.getSize();
-            }
-        }
-        return size;
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+        progressUpdater.updateProgress(fileItems);
     }
-
-    private Integer getNumberOfSelectedFiles() {
-        Integer number = Integer.valueOf(0);
-        for(FileItem fileItem : fileItems){
-            if(fileItem.isChecked()){
-                number++;
-            }
-        }
-        return number;
-    }
-
 }

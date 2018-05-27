@@ -1,7 +1,6 @@
 package com.example.powder.monica.storage;
 
 import android.annotation.SuppressLint;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
@@ -32,34 +32,32 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 
 public class StorageActivity extends AppCompatActivity {
-    private final static String emailContent = "\nLegenda do notatek:\n" +
+    private static final String emailContent = "\nLegenda do notatek:\n" +
             "Notatki zaczynają się prefixami, które świadczą o ważności informacji\n" +
             "1) Must - oznacza krytyczne wymaganie, które musi zostać spełnione na początku, aby projekt mógł się powieść\n" +
             "2) Should -  wymaganie istotne dla powodzenia projektu, jednak nie są konieczne w aktualnej fazie cyklu projektu\n" +
             "3) Could - wymaganie mniej krytyczne i często są postrzegane jako takie, które dobrze żeby były. " +
             "Kilka takich spełnionych wymagań w projekcie może zwiększyć zadowolenie klienta przy równoczesnym niskim koszcie ich dostarczenia.\n" +
             "4) Will not - informacje, które w chwilii obecnej nie są wymagane, ale mogą się stać np. w kolejnym cyklu projektu";
+
+    private static final int MAX_FILES_SIZE = 10485760;
     protected ProgressBar progressBar;
     protected TextView percentageProgress;
     private Button sendButton;
+    private Button checkAllButton;
     private List<File> files;
-    private Set<FileItem> fileItemsSet = new LinkedHashSet<>();
+    private List<FileItem> fileItems = new ArrayList<>();
     private String name;
-    private Double sizeSelectedItems;
     private String recorderName;
     private String meetingName;
     private ArrayList<String> checkedFileNames = new ArrayList<>();
     private String path;
     private StorageArrayAdapter storageArrayAdapter;
-    private Button checkAllButton;
-    private myBoolean checkedAll;
     private ListView listView;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -67,60 +65,46 @@ public class StorageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_storage);
-        sendButton = (Button) findViewById(R.id.send_popup);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        percentageProgress = (TextView) findViewById(R.id.percProgress);
-        checkAllButton = (Button) findViewById(R.id.checkAllButton);
-        listView = (ListView) findViewById(R.id.storageListView);
-        name = getIntent().getExtras().getString("Name");
-        recorderName = getIntent().getExtras().getString("recorderName");
-        meetingName = getIntent().getExtras().getString("meetingName");
-        checkedAll = new myBoolean();
 
-
-        path = Environment.getExternalStorageDirectory().getPath()
-                + "/AudioRecorder/" + name + "/";
-        File directory = new File(path);
+        findViewsById();
+        getExtraDataFromPreviousActivity();
+        File directory = getDirectoryOfMeeting();
         files = Arrays.asList(directory.listFiles());
-
-
-        for (File file : files) {
-            if (!file.getName().equals("email.txt")) {
-                String name = file.getName();
-                fileItemsSet.add(new FileItem(name, file.length(), false));
-            }
-        }
+        createFileItemsBasedOnExistingFiles();
 
         ProgressUpdater progressUpdater = new ProgressUpdater(progressBar, percentageProgress);
-        storageArrayAdapter = new StorageArrayAdapter(this, new ArrayList<>(fileItemsSet), progressUpdater, checkAllButton, checkedAll);
+
+        storageArrayAdapter = new StorageArrayAdapter(this, fileItems, progressUpdater);
+
         listView.setAdapter(storageArrayAdapter);
 
         listView.setTextFilterEnabled(true);
-
 
         listView.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext(), listView) {
 
             @Override
             public void onClick() {
                 super.onClick();
-                if (getPosition() != -1) {
-                    int position = getPosition() + 1;
-                    File file = files.get(position);
-                    AppLog.logString(file.getName());
-                    if (file.getName().contains("jpg")) {
-                        openImage(file, listView.getContext());
-                    } else {
-                        openAudio(file);
-                    }
+                if(getPosition() > -1){
+                    openFile();
                 }
             }
 
+            private void openFile() {
+                int position = getPosition() + 1;
+                File file = files.get(position);
+                AppLog.logString(file.getName());
+                if (file.getName().contains("jpg")) {
+                    openImage(file, listView.getContext());
+                } else {
+                    openAudio(file);
+                }
+            }
 
             @Override
             public void onLongClick() {
                 super.onLongClick();
             }
-
 
             @Override
             public void onSwipeLeft() {
@@ -128,12 +112,10 @@ public class StorageActivity extends AppCompatActivity {
                 if (files.size() < 2) {
                     return;
                 }
-                if (getPosition() != -1) {
-                    int position = getPosition() + 1;
-                    File file = files.get(position);
-                    deleteItem(file);
-                    Toast.makeText(getApplicationContext(), "Usunięto " + file.getName(), Toast.LENGTH_LONG).show();
-                }
+                int position = getPosition() + 1;
+                File file = files.get(position);
+                deleteItem(file);
+                Toast.makeText(getApplicationContext(), "Usunięto " + file.getName(), Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -146,8 +128,8 @@ public class StorageActivity extends AppCompatActivity {
                 addArchive(files, path);
                 Toast.makeText(getApplicationContext(), "Dodano archiwum zip", Toast.LENGTH_LONG).show();
             }
-        });
 
+        });
 
         sendButton.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(StorageActivity.this, sendButton);
@@ -168,15 +150,44 @@ public class StorageActivity extends AppCompatActivity {
 
             popup.show();
         });
+    }
 
+    @NonNull
+    private File getDirectoryOfMeeting() {
+        path = Environment.getExternalStorageDirectory().getPath()
+                + "/AudioRecorder/" + name + "/";
+        return new File(path);
+    }
 
+    private void createFileItemsBasedOnExistingFiles() {
+        for (File file : files) {
+            if (!file.getName().equals("email.txt")) {
+                String name = file.getName();
+                fileItems.add(new FileItem(name, file.length(), false));
+            }
+        }
+    }
+
+    private void getExtraDataFromPreviousActivity() {
+        name = getIntent().getExtras().getString("Name");
+        recorderName = getIntent().getExtras().getString("recorderName");
+        meetingName = getIntent().getExtras().getString("meetingName");
+    }
+
+    private void findViewsById() {
+        sendButton = (Button) findViewById(R.id.send_popup);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        percentageProgress = (TextView) findViewById(R.id.percProgress);
+        checkAllButton = (Button) findViewById(R.id.checkAllButton);
+        listView = (ListView) findViewById(R.id.storageListView);
     }
 
     private void updateCheckedList() {
         checkedFileNames.clear();
-        for (FileItem fileItem : fileItemsSet) {
+        for (FileItem fileItem : fileItems) {
             if (fileItem.isChecked()) {
                 checkedFileNames.add(fileItem.getName());
+                AppLog.logString("DELETE");
             }
         }
     }
@@ -205,14 +216,15 @@ public class StorageActivity extends AppCompatActivity {
     }
 
     private void deleteItem(File file) {
-        FileItem fileItem = findFileItemInTheSetByName(file.getName());
+        FileItem fileItem = findFileItemInTheListByName(file.getName());
         if (fileItem != null) {
-            fileItemsSet.remove(fileItem);
+            fileItems.remove(fileItem);
         }
         file.delete();
         File directory = new File(path);
         files = Arrays.asList(directory.listFiles());
         storageArrayAdapter.remove(fileItem);
+        storageArrayAdapter.notifyDataSetChanged();
     }
 
     public void deleteChecked(View view) {
@@ -254,8 +266,8 @@ public class StorageActivity extends AppCompatActivity {
 
     }
 
-    private FileItem findFileItemInTheSetByName(String name) {
-        for (FileItem fileItem : fileItemsSet) {
+    private FileItem findFileItemInTheListByName(String name) {
+        for (FileItem fileItem : fileItems) {
             if (fileItem.getName().equals(name)) {
                 return fileItem;
             }
@@ -266,7 +278,7 @@ public class StorageActivity extends AppCompatActivity {
     private void sendEmail() {
 
         updateCheckedList();
-        sizeSelectedItems = 0.0;
+        Double sizeSelectedItems = 0.0;
         File directory = new File(path);
         File[] files = directory.listFiles();
         for (File file : files) {
@@ -275,7 +287,7 @@ public class StorageActivity extends AppCompatActivity {
             }
         }
 
-        if (sizeSelectedItems <= 10485760) {
+        if (sizeSelectedItems <= MAX_FILES_SIZE) {
 
             ArrayList<Uri> filesUri = new ArrayList<>();
             directory = new File(path);
@@ -338,23 +350,37 @@ public class StorageActivity extends AppCompatActivity {
     }
 
     public void checkAll(View view) {
-        if (fileItemsSet.isEmpty()) return;
-        if (checkedAll.getValue()) {
-            for (FileItem fileItem : fileItemsSet) {
-                fileItem.setChecked(false);
-            }
-            checkedAll.setValue(false);
+        if (fileItems.isEmpty()) return;
+
+        if (checkedAll()) {
+            unCheckAll();
             checkAllButton.setText("Check All");
         } else {
-            for (FileItem fileItem : fileItemsSet) {
-                fileItem.setChecked(true);
-            }
-            checkedAll.setValue(true);
+            checkAll();
             checkAllButton.setText("Uncheck All");
         }
+        storageArrayAdapter.notifyDataSetChanged();
+    }
 
-        storageArrayAdapter.clear();
-        storageArrayAdapter.addAll(fileItemsSet);
+    private boolean checkedAll() {
+        for(FileItem fileItem : fileItems){
+            if(!fileItem.isChecked()){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void unCheckAll() {
+        for(FileItem fileItem : fileItems){
+            fileItem.setChecked(false);
+        }
+    }
+
+    private void checkAll() {
+        for(FileItem fileItem : fileItems){
+            fileItem.setChecked(true);
+        }
     }
 
     @Override
@@ -362,7 +388,7 @@ public class StorageActivity extends AppCompatActivity {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             Intent data = new Intent();
             checkedFileNames = new ArrayList<>();
-            for (FileItem fileItem : fileItemsSet) {
+            for (FileItem fileItem : fileItems) {
                 if (fileItem.isChecked()) {
                     checkedFileNames.add(fileItem.getName());
                 }
@@ -371,18 +397,6 @@ public class StorageActivity extends AppCompatActivity {
             setResult(RESULT_OK, data);
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    protected class myBoolean {
-        private Boolean aBoolean = Boolean.FALSE;
-
-        public Boolean getValue() {
-            return aBoolean;
-        }
-
-        public void setValue(boolean aBoolean) {
-            this.aBoolean = aBoolean;
-        }
     }
 
 }
