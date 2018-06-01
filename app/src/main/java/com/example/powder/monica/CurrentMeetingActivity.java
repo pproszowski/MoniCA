@@ -28,6 +28,8 @@ import com.google.cloud.android.speech.MessageDialogFragment;
 import com.google.cloud.android.speech.SpeechService;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -52,7 +54,7 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
     private String recorderName;
     private String meetingName = "";
     private MediaRecorder recorder = null;
-    private int currentFormat = 0;
+    private int currentFormat = 1;
     private String recordedFileName;
     private double size;
     private String mailSubject;
@@ -70,14 +72,12 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder binder) {
-            System.out.println("initialized");
             mSpeechService = SpeechService.from(binder);
             mSpeechService.addListener(mSpeechServiceListener);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            System.out.println("uninitialized");
             mSpeechService = null;
         }
     };
@@ -85,7 +85,6 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
     @Override
     protected void onStart(){
         super.onStart();
-        System.out.println("BIND");
         bindService(new Intent(this, SpeechService.class), mServiceConnection, BIND_AUTO_CREATE);
 
 
@@ -102,7 +101,12 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
                     AppLog.logString("Stop Recording");
                     ((ImageButton) v).setImageResource(R.drawable.ic_mic_gray);
                     stopRecording();
-                    mSpeechService.recognizeInputStream(getResources().openRawResource(R.raw.audio));
+                    try {
+                        FileInputStream fis = new FileInputStream(recordedFileName);
+                        mSpeechService.recognizeInputStream(fis);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
                     break;
             }
             return false;
@@ -243,7 +247,8 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(output_formats[currentFormat]);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
+        recorder.setAudioSamplingRate(16_000);
         recordedFileName = getFilename();
         recorder.setOutputFile(recordedFileName);
         AppLog.logString("I CREATE: " + recordedFileName);

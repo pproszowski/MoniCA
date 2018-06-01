@@ -301,9 +301,9 @@ public class SpeechService extends Service {
             mApi.recognize(
                     RecognizeRequest.newBuilder()
                             .setConfig(RecognitionConfig.newBuilder()
-                                    .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
+                                    .setEncoding(RecognitionConfig.AudioEncoding.AMR_WB)
                                     .setLanguageCode("en-US")
-                                    .setSampleRateHertz(16000)
+                                    .setSampleRateHertz(16_000)
                                     .build())
                             .setAudio(RecognitionAudio.newBuilder()
                                     .setContent(ByteString.readFrom(stream))
@@ -312,6 +312,12 @@ public class SpeechService extends Service {
                     mFileResponseObserver);
         } catch (IOException e) {
             Log.e(TAG, "Error loading the input", e);
+        }finally {
+            try {
+                stream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
