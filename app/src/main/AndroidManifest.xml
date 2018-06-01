@@ -59,6 +59,7 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity android:name=".AddEmail"></activity>
+        <service android:name="com.google.cloud.android.speech.SpeechService"/>
     </application>
 
 </manifest>
