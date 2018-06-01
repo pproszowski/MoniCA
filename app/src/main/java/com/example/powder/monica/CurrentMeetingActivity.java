@@ -8,12 +8,15 @@ import java.util.List;
 import java.util.Objects;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -26,13 +29,14 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.powder.monica.storage.StorageActivity;
+import com.google.cloud.android.speech.MessageDialogFragment;
+import com.google.cloud.android.speech.SpeechService;
 
 
-public class CurrentMeetingActivity extends AppCompatActivity {
+public class CurrentMeetingActivity extends AppCompatActivity implements MessageDialogFragment.Listener {
     private ImageButton recordButton;
     private TextView recordingStatus;
     private TextView sizeText;
-    private TextView sizeOfSelectedItemsText;
     private TextView willNotText;
     private TextView couldText;
     private TextView shouldText;
@@ -53,9 +57,51 @@ public class CurrentMeetingActivity extends AppCompatActivity {
     private static final int GET_CHECKED_FILE_NAMES = 1;
     private static final int REQUEST_TAKE_PHOTO = 2;
     private String choosenPriority = "WillNot ";
-    private String path;
     private double sizeSelectedItems;
 
+    private SpeechService mSpeechService;
+
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder binder) {
+            mSpeechService = SpeechService.from(binder);
+            mSpeechService.addListener(mSpeechServiceListener);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mSpeechService = null;
+        }
+
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Prepare Cloud Speech API
+        bindService(new Intent(this, SpeechService.class), mServiceConnection, BIND_AUTO_CREATE);
+    }
+
+
+    @Override
+    protected void onStop() {
+        // Stop Cloud Speech API
+        mSpeechService.removeListener(mSpeechServiceListener);
+        unbindService(mServiceConnection);
+        mSpeechService = null;
+
+        super.onStop();
+    }
+
+
+    private final SpeechService.Listener mSpeechServiceListener =
+            new SpeechService.Listener() {
+                @Override
+                public void onSpeechRecognized(final String text, final boolean isFinal) {
+                    System.out.println(">>>>>>>>>>>>>>>>>>>text: " + text);
+                }
+            };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -126,10 +172,12 @@ public class CurrentMeetingActivity extends AppCompatActivity {
                     AppLog.logString("Stop Recording");
                     ((ImageButton) v).setImageResource(R.drawable.ic_mic_gray);
                     stopRecording();
+                    mSpeechService.recognizeInputStream(getResources().openRawResource(R.raw.audio));
                     break;
             }
             return false;
         });
+
 
         priorityBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -339,4 +387,8 @@ public class CurrentMeetingActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onMessageDialogDismissed() {
+
+    }
 }
