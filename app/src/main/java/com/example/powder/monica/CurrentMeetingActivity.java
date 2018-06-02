@@ -107,13 +107,6 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
                     ((ImageButton) v).setImageResource(R.drawable.ic_mic_gray);
                     stopRecording();
                     convertFile(new File(recordedFileName));
-                    try {
-                       FileInputStream fis = new FileInputStream(recordedFileName);
-                        mSpeechService.recognizeInputStream(fis);
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-//                    mSpeechService.recognizeInputStream(getResources().openRawResource(R.raw.audio));
                     break;
             }
             return false;
@@ -411,6 +404,12 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
             public void onSuccess(File convertedFile) {
                 file.delete();
                 recordedFileName = convertedFile.getAbsolutePath();
+                try {
+                    FileInputStream fis = new FileInputStream(recordedFileName);
+                    mSpeechService.recognizeInputStream(fis);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
                 //success
             }
             @Override

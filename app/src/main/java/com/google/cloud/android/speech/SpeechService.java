@@ -303,7 +303,6 @@ public class SpeechService extends Service {
                             .setConfig(RecognitionConfig.newBuilder()
                                     .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
                                     .setLanguageCode("en-US")
-                                    .setSampleRateHertz(16_000)
                                     .build())
                             .setAudio(RecognitionAudio.newBuilder()
                                     .setContent(ByteString.readFrom(stream))
