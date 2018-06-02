@@ -301,7 +301,7 @@ public class SpeechService extends Service {
             mApi.recognize(
                     RecognizeRequest.newBuilder()
                             .setConfig(RecognitionConfig.newBuilder()
-                                    .setEncoding(RecognitionConfig.AudioEncoding.AMR_WB)
+                                    .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
                                     .setLanguageCode("en-US")
                                     .setSampleRateHertz(16_000)
                                     .build())

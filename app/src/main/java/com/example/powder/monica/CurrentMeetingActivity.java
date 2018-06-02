@@ -35,14 +35,22 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
+import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
+import cafe.adriel.androidaudioconverter.callback.ILoadCallback;
+import cafe.adriel.androidaudioconverter.model.AudioFormat;
+
 
 public class CurrentMeetingActivity extends AppCompatActivity implements MessageDialogFragment.Listener {
+    public static final int REQUEST_RECORD_AUDIO_PERMISSION = 1;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
     private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
     private static final int output_formats[] = {MediaRecorder.OutputFormat.DEFAULT, MediaRecorder.OutputFormat.THREE_GPP};
     private static final String file_exts[] = {AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP};
     private static final int GET_CHECKED_FILE_NAMES = 1;
     private static final int REQUEST_TAKE_PHOTO = 2;
+    private final SpeechService.Listener mSpeechServiceListener =
+            (text, isFinal) -> System.out.println(text);
     private ImageButton recordButton;
     private TextView recordingStatus;
     private TextView sizeText;
@@ -54,7 +62,7 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
     private String recorderName;
     private String meetingName = "";
     private MediaRecorder recorder = null;
-    private int currentFormat = 1;
+    private int currentFormat = 0;
     private String recordedFileName;
     private double size;
     private String mailSubject;
@@ -63,9 +71,6 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
     private double sizeSelectedItems;
     private MediaRecorder.OnErrorListener errorListener = (mr, what, extra) -> AppLog.logString("Error: " + what + ", " + extra);
     private MediaRecorder.OnInfoListener infoListener = (mr, what, extra) -> AppLog.logString("Warning: " + what + ", " + extra);
-    public static final int REQUEST_RECORD_AUDIO_PERMISSION = 1;
-    private final SpeechService.Listener mSpeechServiceListener =
-            (text, isFinal) -> System.out.println(text);
     private SpeechService mSpeechService;
 
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -83,7 +88,7 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
     };
 
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
         bindService(new Intent(this, SpeechService.class), mServiceConnection, BIND_AUTO_CREATE);
 
@@ -101,12 +106,14 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
                     AppLog.logString("Stop Recording");
                     ((ImageButton) v).setImageResource(R.drawable.ic_mic_gray);
                     stopRecording();
+                    convertFile(new File(recordedFileName));
                     try {
-                        FileInputStream fis = new FileInputStream(recordedFileName);
+                       FileInputStream fis = new FileInputStream(recordedFileName);
                         mSpeechService.recognizeInputStream(fis);
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
+//                    mSpeechService.recognizeInputStream(getResources().openRawResource(R.raw.audio));
                     break;
             }
             return false;
@@ -196,6 +203,18 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
 
             }
         });
+
+        AndroidAudioConverter.load(this, new ILoadCallback() {
+            @Override
+            public void onSuccess() {
+                // Great!
+            }
+
+            @Override
+            public void onFailure(Exception error) {
+                // FFmpeg is not supported by device
+            }
+        });
     }
 
     protected void onResume() {
@@ -247,7 +266,7 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(output_formats[currentFormat]);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
         recorder.setAudioSamplingRate(16_000);
         recordedFileName = getFilename();
         recorder.setOutputFile(recordedFileName);
@@ -266,7 +285,8 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
     private void stopRecording() {
         try {
             recorder.stop();
-            size += new File(recordedFileName).length();
+            File file = new File(recordedFileName);
+            size += file.length();
             recordingStatus.setText("Record saved!");
             if (size <= 1048576) {
                 sizeText.setText(String.format("Size : %.2fKB", size / 1024));
@@ -383,5 +403,26 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
             finish();
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    private void convertFile(File file) {
+        IConvertCallback callback = new IConvertCallback() {
+            @Override
+            public void onSuccess(File convertedFile) {
+                file.delete();
+                recordedFileName = convertedFile.getAbsolutePath();
+                //success
+            }
+            @Override
+            public void onFailure(Exception error) {
+                // Oops! Something went wrong
+            }
+        };
+        AndroidAudioConverter.with(this)
+                .setFile(file)
+                .setFormat(AudioFormat.FLAC)
+                .setCallback(callback)
+                .convert();
+
     }
 }

@@ -72,6 +72,8 @@ dependencies {
     implementation "io.grpc:grpc-stub:$grpcVersion"
     implementation 'javax.annotation:javax.annotation-api:1.2'
 
+    implementation 'com.github.adrielcafe:AndroidAudioConverter:0.0.8'
+
 
     // OAuth2 for Google API
     implementation('com.google.auth:google-auth-library-oauth2-http:0.7.0') {
