@@ -4,8 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
@@ -17,7 +15,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.powder.monica.storage.StorageActivity;
@@ -40,44 +37,18 @@ public class CurrentMeetingActivity extends AppCompatActivity {
     private static final int GET_CHECKED_FILE_NAMES = 1;
 
     private static final int REQUEST_TAKE_PHOTO = 2;
-
-    private ImageButton recordButton;
-
-    private TextView recordingStatus;
-
-    private TextView sizeText;
-
-    private TextView meetingNameText;
-
-    private String recorderName;
-
-    private String meetingName = "";
-
-    private String recordedFileName;
-
-    private double size;
-
-    private String mailSubject;
-
-    private List<String> checkedFileNames = new ArrayList<>();
-
-    private double sizeSelectedItems;
-
-    private SpeechService mSpeechService;
-
     private final SpeechService.Listener mSpeechServiceListener = (text, isFinal) -> System.out.println(text);
-
-    private TextView willNotText;
-
-    private TextView couldText;
-
-    private TextView shouldText;
-
-    private TextView mustText;
-
-    private String chosenPriority = "WillNot ";
-
-
+    private ImageButton recordButton;
+    private TextView recordingStatus;
+    private TextView sizeText;
+    private String recorderName;
+    private String meetingName = "";
+    private String recordedFileName;
+    private double size;
+    private String mailSubject;
+    private List<String> checkedFileNames = new ArrayList<>();
+    private double sizeSelectedItems;
+    private SpeechService mSpeechService;
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
@@ -91,7 +62,7 @@ public class CurrentMeetingActivity extends AppCompatActivity {
             mSpeechService = null;
         }
     };
-
+    private PriorityBar priorityBar;
     private VoiceRecorder voiceRecorder;
 
     @Override
@@ -107,7 +78,7 @@ public class CurrentMeetingActivity extends AppCompatActivity {
                     recordingStatus.setText(R.string.recording);
                     ((ImageButton) v).setImageResource(R.drawable.ic_mic_red);
                     AppLog.logString("Start Recording");
-                    voiceRecorder.startRecording(chosenPriority);
+                    voiceRecorder.startRecording(priorityBar.getChosenPriority());
                     break;
                 case MotionEvent.ACTION_UP:
                     AppLog.logString("Stop Recording");
@@ -171,38 +142,12 @@ public class CurrentMeetingActivity extends AppCompatActivity {
         recordButton = findViewById(R.id.recordButton);
         recordingStatus = findViewById(R.id.textView);
         sizeText = findViewById(R.id.sizeText);
-        willNotText = findViewById(R.id.willNotText);
-        couldText = findViewById(R.id.couldText);
-        shouldText = findViewById(R.id.shouldText);
-        mustText = findViewById(R.id.mustText);
-        meetingNameText = (TextView) findViewById(R.id.meetingNameField);
+        TextView meetingNameText = (TextView) findViewById(R.id.meetingNameField);
         meetingNameText.setText(meetingName);
-        SeekBar priorityBar = findViewById(R.id.priorityBar);
-        SharedPreferences sharedPref = getSharedPreferences("defaultFTP.xml", 0);
-
-        willNotText.setTypeface(null, Typeface.BOLD);
-        willNotText.setTextSize(16);
 
         voiceRecorder = new VoiceRecorder(meetingName, recorderName);
+        priorityBar = new PriorityBar(findViewById(android.R.id.content));
 
-        priorityBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress,
-                                          boolean fromUser) {
-                setPriority(progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
 
         AndroidAudioConverter.load(this, new ILoadCallback() {
             @Override
@@ -282,47 +227,8 @@ public class CurrentMeetingActivity extends AppCompatActivity {
         Intent photoIntent = new Intent(this, MakePhotoActivity.class);
         photoIntent.putExtra("Name", meetingName);
         photoIntent.putExtra("recorderName", recorderName);
-        photoIntent.putExtra("choosenPriority", chosenPriority);
+        photoIntent.putExtra("choosenPriority", priorityBar.getChosenPriority());
         startActivityForResult(photoIntent, REQUEST_TAKE_PHOTO);
-
-    }
-
-    public void setPriority(int progress) {
-        switch (progress) {
-            case 0:
-                setChosenPriority(willNotText, couldText, shouldText, mustText);
-                chosenPriority = "WillNot ";
-                break;
-
-            case 1:
-                setChosenPriority(couldText, willNotText, shouldText, mustText);
-                chosenPriority = "Could ";
-                break;
-
-            case 2:
-                setChosenPriority(shouldText, mustText, couldText, willNotText);
-                chosenPriority = "Should ";
-                break;
-
-            case 3:
-                setChosenPriority(mustText, shouldText, willNotText, couldText);
-                chosenPriority = "Must ";
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void setChosenPriority(TextView chosenPriority, TextView a, TextView b, TextView c) {
-        chosenPriority.setTypeface(null, Typeface.BOLD);
-        chosenPriority.setTextSize(16);
-
-        a.setTypeface(null, Typeface.NORMAL);
-        a.setTextSize(14);
-        b.setTypeface(null, Typeface.NORMAL);
-        b.setTextSize(14);
-        c.setTypeface(null, Typeface.NORMAL);
-        c.setTextSize(14);
 
     }
 
