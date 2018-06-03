@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
 import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
@@ -37,18 +38,31 @@ public class CurrentMeetingActivity extends AppCompatActivity {
     private static final int GET_CHECKED_FILE_NAMES = 1;
 
     private static final int REQUEST_TAKE_PHOTO = 2;
+
     private final SpeechService.Listener mSpeechServiceListener = (text, isFinal) -> System.out.println(text);
+
     private ImageButton recordButton;
+
     private TextView recordingStatus;
+
     private TextView sizeText;
+
     private String recorderName;
+
     private String meetingName = "";
+
     private String recordedFileName;
+
     private double size;
+
     private String mailSubject;
+
     private List<String> checkedFileNames = new ArrayList<>();
+
     private double sizeSelectedItems;
+
     private SpeechService mSpeechService;
+
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
@@ -162,6 +176,7 @@ public class CurrentMeetingActivity extends AppCompatActivity {
         });
     }
 
+    @Override
     protected void onResume() {
         super.onResume();
 
@@ -181,7 +196,7 @@ public class CurrentMeetingActivity extends AppCompatActivity {
             if (checkedFileNames.contains(file.getName())) {
                 sizeSelectedItems += file.length();
             }
-            if (!"email.txt".equals(file.getName())) {
+            if (!Objects.equals("email.txt", file.getName())) {
                 size += file.length();
             }
         }
