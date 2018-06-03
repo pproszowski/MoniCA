@@ -25,7 +25,7 @@ import java.util.Date;
 import javax.security.auth.callback.Callback;
 
 
-public class MakePhoto extends Activity {
+public class MakePhotoActivity extends Activity {
 
     static final int REQUEST_TAKE_PHOTO = 1;
     private Activity activity;

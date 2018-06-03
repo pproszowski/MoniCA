@@ -1,17 +1,14 @@
 package com.example.powder.monica;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -24,15 +21,12 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.powder.monica.storage.StorageActivity;
-import com.google.cloud.android.speech.MessageDialogFragment;
 import com.google.cloud.android.speech.SpeechService;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
@@ -41,37 +35,48 @@ import cafe.adriel.androidaudioconverter.callback.ILoadCallback;
 import cafe.adriel.androidaudioconverter.model.AudioFormat;
 
 
-public class CurrentMeetingActivity extends AppCompatActivity implements MessageDialogFragment.Listener {
-    public static final int REQUEST_RECORD_AUDIO_PERMISSION = 1;
-    private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
-    private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
-    private static final int output_formats[] = {MediaRecorder.OutputFormat.DEFAULT, MediaRecorder.OutputFormat.THREE_GPP};
-    private static final String file_exts[] = {AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP};
+public class CurrentMeetingActivity extends AppCompatActivity {
+
     private static final int GET_CHECKED_FILE_NAMES = 1;
+
     private static final int REQUEST_TAKE_PHOTO = 2;
-    private final SpeechService.Listener mSpeechServiceListener =
-            (text, isFinal) -> System.out.println(text);
+
     private ImageButton recordButton;
+
     private TextView recordingStatus;
+
     private TextView sizeText;
-    private TextView willNotText;
-    private TextView couldText;
-    private TextView shouldText;
-    private TextView mustText;
+
     private TextView meetingNameText;
+
     private String recorderName;
+
     private String meetingName = "";
-    private MediaRecorder recorder = null;
-    private int currentFormat = 0;
+
     private String recordedFileName;
+
     private double size;
+
     private String mailSubject;
+
     private List<String> checkedFileNames = new ArrayList<>();
-    private String choosenPriority = "WillNot ";
+
     private double sizeSelectedItems;
-    private MediaRecorder.OnErrorListener errorListener = (mr, what, extra) -> AppLog.logString("Error: " + what + ", " + extra);
-    private MediaRecorder.OnInfoListener infoListener = (mr, what, extra) -> AppLog.logString("Warning: " + what + ", " + extra);
+
     private SpeechService mSpeechService;
+
+    private final SpeechService.Listener mSpeechServiceListener = (text, isFinal) -> System.out.println(text);
+
+    private TextView willNotText;
+
+    private TextView couldText;
+
+    private TextView shouldText;
+
+    private TextView mustText;
+
+    private String chosenPriority = "WillNot ";
+
 
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
@@ -87,6 +92,8 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
         }
     };
 
+    private VoiceRecorder voiceRecorder;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -100,13 +107,13 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
                     recordingStatus.setText(R.string.recording);
                     ((ImageButton) v).setImageResource(R.drawable.ic_mic_red);
                     AppLog.logString("Start Recording");
-                    startRecording();
+                    voiceRecorder.startRecording(chosenPriority);
                     break;
                 case MotionEvent.ACTION_UP:
                     AppLog.logString("Stop Recording");
                     ((ImageButton) v).setImageResource(R.drawable.ic_mic_gray);
-                    stopRecording();
-                    convertFile(new File(recordedFileName));
+                    File file = voiceRecorder.stopRecording();
+                    convertFile(file);
                     break;
             }
             return false;
@@ -176,13 +183,13 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
         willNotText.setTypeface(null, Typeface.BOLD);
         willNotText.setTextSize(16);
 
+        voiceRecorder = new VoiceRecorder(meetingName, recorderName);
 
         priorityBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
-                // TODO Auto-generated method stub
                 setPriority(progress);
             }
 
@@ -233,73 +240,12 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
                 size += file.length();
             }
         }
-        if (size <= 1048576) {
+        if (size <= 1_048_576) {
             sizeText.setText(String.format("Size : %.2fKB", size / 1024));
         } else {
-            sizeText.setText(String.format("Size : %.2fMB", size / 1048576));
+            sizeText.setText(String.format("Size : %.2fMB", size / 1_048_576));
         }
     }
-
-    private String getFilename() {
-        String filepath = Environment.getExternalStorageDirectory().getPath();
-        File file = new File(filepath, recorderName + "/" + meetingName);
-
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        return (file.getAbsolutePath() + "/" + choosenPriority + "Rec "
-                + Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "꞉"
-                + Calendar.getInstance().get(Calendar.MINUTE) + "꞉"
-                + Calendar.getInstance().get(Calendar.SECOND)
-                + file_exts[currentFormat]);
-
-    }
-
-    private void startRecording() {
-        recorder = new MediaRecorder();
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(output_formats[currentFormat]);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-        recorder.setAudioSamplingRate(16_000);
-        recordedFileName = getFilename();
-        recorder.setOutputFile(recordedFileName);
-        AppLog.logString("I CREATE: " + recordedFileName);
-        recorder.setOnErrorListener(errorListener);
-        recorder.setOnInfoListener(infoListener);
-
-        try {
-            recorder.prepare();
-            recorder.start();
-        } catch (IllegalStateException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void stopRecording() {
-        try {
-            recorder.stop();
-            File file = new File(recordedFileName);
-            size += file.length();
-            recordingStatus.setText("Record saved!");
-            if (size <= 1048576) {
-                sizeText.setText(String.format("Size : %.2fKB", size / 1024));
-            } else {
-                sizeText.setText(String.format("Size : %.2fMB", size / 1048576));
-            }
-        } catch (RuntimeException e) {
-            recordingStatus.setText(R.string.record_too_short);
-            File file = new File(recordedFileName);
-            file.delete();
-        }
-
-        if (recorder != null) {
-            recorder.reset();
-            recorder.release();
-
-            recorder = null;
-        }
-    }
-
 
     public void goToStorage(View view) {
         Intent intent = new Intent(this, StorageActivity.class);
@@ -331,18 +277,12 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
         }
     }
 
-    @Override
-    public void onMessageDialogDismissed() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},
-                REQUEST_RECORD_AUDIO_PERMISSION);
-    }
-
     public void makePhoto(View view) {
 
-        Intent photoIntent = new Intent(this, MakePhoto.class);
+        Intent photoIntent = new Intent(this, MakePhotoActivity.class);
         photoIntent.putExtra("Name", meetingName);
         photoIntent.putExtra("recorderName", recorderName);
-        photoIntent.putExtra("choosenPriority", choosenPriority);
+        photoIntent.putExtra("choosenPriority", chosenPriority);
         startActivityForResult(photoIntent, REQUEST_TAKE_PHOTO);
 
     }
@@ -351,22 +291,22 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
         switch (progress) {
             case 0:
                 setChosenPriority(willNotText, couldText, shouldText, mustText);
-                choosenPriority = "WillNot ";
+                chosenPriority = "WillNot ";
                 break;
 
             case 1:
                 setChosenPriority(couldText, willNotText, shouldText, mustText);
-                choosenPriority = "Could ";
+                chosenPriority = "Could ";
                 break;
 
             case 2:
                 setChosenPriority(shouldText, mustText, couldText, willNotText);
-                choosenPriority = "Should ";
+                chosenPriority = "Should ";
                 break;
 
             case 3:
                 setChosenPriority(mustText, shouldText, willNotText, couldText);
-                choosenPriority = "Must ";
+                chosenPriority = "Must ";
                 break;
             default:
                 break;
@@ -412,6 +352,7 @@ public class CurrentMeetingActivity extends AppCompatActivity implements Message
                 }
                 //success
             }
+
             @Override
             public void onFailure(Exception error) {
                 // Oops! Something went wrong

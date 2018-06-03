@@ -34,7 +34,7 @@
             android:theme="@style/AppTheme" />
         <activity android:name=".NewMeetingActivity" />
         <activity
-            android:name=".MakePhoto"
+            android:name=".MakePhotoActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".UserSettingActivity"
