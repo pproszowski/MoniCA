@@ -106,6 +106,14 @@ public class CurrentMeetingActivity extends AppCompatActivity {
 
     }
 
+    private void changeSizeOfFilesTextView() {
+        if (size <= 1_048_576) {
+            sizeText.setText(String.format("Size : %.2fKB", size / 1024));
+        } else {
+            sizeText.setText(String.format("Size : %.2fMB", size / 1_048_576));
+        }
+    }
+
     @Override
     protected void onStop() {
 
@@ -179,32 +187,8 @@ public class CurrentMeetingActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        size = 0;
-        String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
-
-        sizeSelectedItems = 0;
-        File directory = new File(path);
-
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
-        File[] files = directory.listFiles();
-
-        for (File file : files) {
-            if (checkedFileNames.contains(file.getName())) {
-                sizeSelectedItems += file.length();
-            }
-            if (!Objects.equals("email.txt", file.getName())) {
-                size += file.length();
-            }
-        }
-        if (size <= 1_048_576) {
-            sizeText.setText(String.format("Size : %.2fKB", size / 1024));
-        } else {
-            sizeText.setText(String.format("Size : %.2fMB", size / 1_048_576));
-        }
+        getSizeOfFiles();
+        changeSizeOfFilesTextView();
     }
 
     public void goToStorage(View view) {
@@ -271,7 +255,8 @@ public class CurrentMeetingActivity extends AppCompatActivity {
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-                //success
+                getSizeOfFiles();
+                changeSizeOfFilesTextView();
             }
 
             @Override
@@ -285,5 +270,29 @@ public class CurrentMeetingActivity extends AppCompatActivity {
                 .setCallback(callback)
                 .convert();
 
+    }
+
+    private void getSizeOfFiles(){
+
+        size = 0;
+        sizeSelectedItems = 0;
+
+        String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
+        File directory = new File(path);
+
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        File[] files = directory.listFiles();
+
+        for (File file : files) {
+            if (checkedFileNames.contains(file.getName())) {
+                sizeSelectedItems += file.length();
+            }
+            if (!Objects.equals("email.txt", file.getName())) {
+                size += file.length();
+            }
+        }
     }
 }
