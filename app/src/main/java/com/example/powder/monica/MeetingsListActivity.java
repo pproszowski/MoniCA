@@ -12,17 +12,21 @@ import android.view.MenuInflater;
 import android.widget.ListView;
 import android.widget.SearchView;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class MeetingsListActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
+
     private String recorderName;
+
     private ListView listView;
+
     private MeetingsListAdapter adapter;
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -60,11 +64,17 @@ public class MeetingsListActivity extends AppCompatActivity implements SearchVie
 
         for (File file : dir.listFiles()) {
             String name = file.getName();
-            String lastModifyDate = new Date(file.lastModified()).toString();
-            meetingItems.add(new MeetingItem(name, lastModifyDate));
+            String creationDate = null;
+            try {
+                creationDate = getCreationDate(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            meetingItems.add(new MeetingItem(name, creationDate));
         }
 
         adapter = new MeetingsListAdapter(this, meetingItems);
+
         listView.setAdapter(adapter);
 
         listView.setTextFilterEnabled(true);
@@ -75,6 +85,32 @@ public class MeetingsListActivity extends AppCompatActivity implements SearchVie
             onTouchActivity.putExtra("Name", meetingItems.get(position).getName());
             startActivity(onTouchActivity);
         });
+    }
+
+    private String getCreationDate(File file) throws IOException {
+        String dateCreation = null;
+        File[] files = file.listFiles();
+        File creationFile = null;
+
+        for (File candidateFile : files) {
+            if ("email.txt".equals(candidateFile.getName())) {
+                creationFile = candidateFile;
+            }
+        }
+        if (creationFile == null) {
+            return null;
+        }
+
+        FileInputStream is;
+        BufferedReader reader;
+
+        if (creationFile.exists()) {
+            is = new FileInputStream(creationFile);
+            reader = new BufferedReader(new InputStreamReader(is));
+            dateCreation = reader.readLine().replace(file.getName(), "");
+        }
+
+        return dateCreation;
     }
 
     @Override

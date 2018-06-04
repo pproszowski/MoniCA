@@ -1,12 +1,10 @@
 package com.example.powder.monica;
 
-import java.util.Date;
-
 public class MeetingItem {
     private String name;
     private String date;
 
-    public MeetingItem(String name, String date){
+    public MeetingItem(String name, String date) {
         this.name = name;
         this.date = date;
     }
