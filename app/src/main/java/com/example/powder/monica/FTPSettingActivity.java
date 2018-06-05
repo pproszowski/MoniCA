@@ -110,4 +110,10 @@ public class FTPSettingActivity extends Activity {
         }
         return super.onKeyDown(keyCode, event);
     }
+
+    @Override
+    public void onPause() {
+        testThread.interrupt();
+        super.onPause();
+    }
 }
