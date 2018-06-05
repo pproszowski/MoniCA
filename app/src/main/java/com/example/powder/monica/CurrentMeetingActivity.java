@@ -1,19 +1,12 @@
 package com.example.powder.monica;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Objects;
-
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Typeface;
-import android.media.MediaRecorder;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -22,46 +15,120 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.powder.monica.storage.StorageActivity;
+import com.google.cloud.android.speech.SpeechService;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
+import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
+import cafe.adriel.androidaudioconverter.callback.ILoadCallback;
+import cafe.adriel.androidaudioconverter.model.AudioFormat;
 
 
 public class CurrentMeetingActivity extends AppCompatActivity {
-    private ImageButton recordButton;
-    private TextView recordingStatus;
-    private TextView sizeText;
-    private TextView sizeOfSelectedItemsText;
-    private TextView willNotText;
-    private TextView couldText;
-    private TextView shouldText;
-    private TextView mustText;
-    private TextView meetingNameText;
-    private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
-    private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
-    private String recorderName;
-    private String meetingName = "";
-    private MediaRecorder recorder = null;
-    private int currentFormat = 0;
-    private static final int output_formats[] = {MediaRecorder.OutputFormat.DEFAULT, MediaRecorder.OutputFormat.THREE_GPP};
-    private static final String file_exts[] = {AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP};
-    private String recordedFileName;
-    private double size;
-    private String mailSubject;
-    private List<String> checkedFileNames = new ArrayList<>();
+
     private static final int GET_CHECKED_FILE_NAMES = 1;
+
     private static final int REQUEST_TAKE_PHOTO = 2;
-    private String choosenPriority = "WillNot ";
-    private String path;
+
+    private final SpeechService.Listener mSpeechServiceListener = (text, isFinal) -> System.out.println(text);
+
+    private ImageButton recordButton;
+
+    private TextView recordingStatus;
+
+    private TextView sizeText;
+
+    private String recorderName;
+
+    private String meetingName = "";
+
+    private String recordedFileName;
+
+    private double size;
+
+    private String mailSubject;
+
+    private List<String> checkedFileNames = new ArrayList<>();
+
     private double sizeSelectedItems;
 
+    private SpeechService mSpeechService;
+
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder binder) {
+            mSpeechService = SpeechService.from(binder);
+            mSpeechService.addListener(mSpeechServiceListener);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mSpeechService = null;
+        }
+    };
+    private PriorityBar priorityBar;
+    private VoiceRecorder voiceRecorder;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bindService(new Intent(this, SpeechService.class), mServiceConnection, BIND_AUTO_CREATE);
+
+
+        recordButton.setOnTouchListener((v, event) -> {
+            recordButton.performClick();
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    recordingStatus.setText(R.string.recording);
+                    ((ImageButton) v).setImageResource(R.drawable.ic_mic_red);
+                    AppLog.logString("Start Recording");
+                    voiceRecorder.startRecording(priorityBar.getChosenPriority());
+                    break;
+                case MotionEvent.ACTION_UP:
+                    AppLog.logString("Stop Recording");
+                    ((ImageButton) v).setImageResource(R.drawable.ic_mic_gray);
+                    File file = voiceRecorder.stopRecording();
+                    convertFile(file);
+                    break;
+            }
+            return false;
+        });
+
+    }
+
+    private void changeSizeOfFilesTextView() {
+        if (size <= 1_048_576) {
+            sizeText.setText(String.format("Size : %.2fKB", size / 1024));
+        } else {
+            sizeText.setText(String.format("Size : %.2fMB", size / 1_048_576));
+        }
+    }
+
+    @Override
+    protected void onStop() {
+
+        // Stop Cloud Speech API
+        mSpeechService.removeListener(mSpeechServiceListener);
+        unbindService(mServiceConnection);
+        mSpeechService = null;
+
+        super.onStop();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.ftp_setting, menu);
-        //inflater.inflate(R.menu.user_setting, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -69,15 +136,12 @@ public class CurrentMeetingActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.ftp_settings_action_bar: {
-
-
                 startActivity(new Intent(CurrentMeetingActivity.this, FTPSettingActivity.class));
                 return true;
             }
 
             case R.id.user_settings_action_bar: {
-
-                Intent intent=new Intent(this, UserSettingActivity.class);
+                Intent intent = new Intent(this, UserSettingActivity.class);
                 intent.putExtra("Name", meetingName);
                 intent.putExtra("recorderName", recorderName);
                 intent.putExtra("email", "");
@@ -100,152 +164,32 @@ public class CurrentMeetingActivity extends AppCompatActivity {
         recordButton = findViewById(R.id.recordButton);
         recordingStatus = findViewById(R.id.textView);
         sizeText = findViewById(R.id.sizeText);
-        willNotText = findViewById(R.id.willNotText);
-        couldText = findViewById(R.id.couldText);
-        shouldText = findViewById(R.id.shouldText);
-        mustText = findViewById(R.id.mustText);
-        meetingNameText = (TextView) findViewById(R.id.meetingNameField);
+        TextView meetingNameText = (TextView) findViewById(R.id.meetingNameField);
         meetingNameText.setText(meetingName);
-        SeekBar priorityBar = findViewById(R.id.priorityBar);
-        SharedPreferences sharedPref = getSharedPreferences("defaultFTP.xml", 0);
 
-        willNotText.setTypeface(null, Typeface.BOLD);
-        willNotText.setTextSize(16);
+        voiceRecorder = new VoiceRecorder(meetingName, recorderName);
+        priorityBar = new PriorityBar(findViewById(android.R.id.content));
 
 
-        recordButton.setOnTouchListener((v, event) -> {
-            recordButton.performClick();
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    recordingStatus.setText(R.string.recording);
-                    ((ImageButton) v).setImageResource(R.drawable.ic_mic_red);
-                    AppLog.logString("Start Recording");
-                    startRecording();
-                    break;
-                case MotionEvent.ACTION_UP:
-                    AppLog.logString("Stop Recording");
-                    ((ImageButton) v).setImageResource(R.drawable.ic_mic_gray);
-                    stopRecording();
-                    break;
-            }
-            return false;
-        });
-
-        priorityBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
+        AndroidAudioConverter.load(this, new ILoadCallback() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress,
-                                          boolean fromUser) {
-                // TODO Auto-generated method stub
-                setPriority(progress);
+            public void onSuccess() {
+                // Great!
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
+            public void onFailure(Exception error) {
+                // FFmpeg is not supported by device
             }
         });
     }
 
+    @Override
     protected void onResume() {
         super.onResume();
-
-        size = 0;
-        String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
-
-        sizeSelectedItems = 0;
-        File directory = new File(path);
-
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
-        File[] files = directory.listFiles();
-
-        for (File file : files) {
-            if (checkedFileNames.contains(file.getName())) {
-                sizeSelectedItems += file.length();
-            }
-            if (!"email.txt".equals(file.getName())) {
-                size += file.length();
-            }
-        }
-        if(size <= 1048576){
-            sizeText.setText(String.format("Size : %.2fKB", size / 1024));
-        }
-        else {
-            sizeText.setText(String.format("Size : %.2fMB", size / 1048576));
-        }
+        getSizeOfFiles();
+        changeSizeOfFilesTextView();
     }
-
-    private String getFilename() {
-        String filepath = Environment.getExternalStorageDirectory().getPath();
-        File file = new File(filepath, recorderName + "/" + meetingName);
-
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        return (file.getAbsolutePath() + "/" + choosenPriority + "Rec "
-                + Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "꞉"
-                + Calendar.getInstance().get(Calendar.MINUTE) + "꞉"
-                + Calendar.getInstance().get(Calendar.SECOND)
-                + file_exts[currentFormat]);
-
-    }
-
-    private void startRecording() {
-        recorder = new MediaRecorder();
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(output_formats[currentFormat]);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-        recordedFileName = getFilename();
-        recorder.setOutputFile(recordedFileName);
-        AppLog.logString("I CREATE: " + recordedFileName);
-        recorder.setOnErrorListener(errorListener);
-        recorder.setOnInfoListener(infoListener);
-
-        try {
-            recorder.prepare();
-            recorder.start();
-        } catch (IllegalStateException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private MediaRecorder.OnErrorListener errorListener = (mr, what, extra) -> AppLog.logString("Error: " + what + ", " + extra);
-
-    private MediaRecorder.OnInfoListener infoListener = (mr, what, extra) -> AppLog.logString("Warning: " + what + ", " + extra);
-
-    private void stopRecording() {
-        try {
-            recorder.stop();
-            size += new File(recordedFileName).length();
-            recordingStatus.setText("Record saved!" );
-            if(size <= 1048576){
-                sizeText.setText(String.format("Size : %.2fKB", size / 1024));
-            }
-            else {
-                sizeText.setText(String.format("Size : %.2fMB", size / 1048576));
-            }
-        } catch (RuntimeException e) {
-            recordingStatus.setText(R.string.record_too_short);
-            File file = new File(recordedFileName);
-            file.delete();
-        }
-
-        if (recorder != null) {
-            recorder.reset();
-            recorder.release();
-
-            recorder = null;
-        }
-    }
-
 
     public void goToStorage(View view) {
         Intent intent = new Intent(this, StorageActivity.class);
@@ -264,65 +208,26 @@ public class CurrentMeetingActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-            if (requestCode == GET_CHECKED_FILE_NAMES && resultCode == RESULT_OK) {
-                if (data != null) {
-                    try {
-                        checkedFileNames = data.getStringArrayListExtra("checkedFileNames");
-                    } catch (RuntimeException e) {
-                        e.printStackTrace();
-                    }
+        if (requestCode == GET_CHECKED_FILE_NAMES && resultCode == RESULT_OK) {
+            if (data != null) {
+                try {
+                    checkedFileNames = data.getStringArrayListExtra("checkedFileNames");
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
+                }
             }
 
 
-            }
+        }
     }
 
     public void makePhoto(View view) {
 
-        Intent photoIntent = new Intent(this, MakePhoto.class);
+        Intent photoIntent = new Intent(this, MakePhotoActivity.class);
         photoIntent.putExtra("Name", meetingName);
         photoIntent.putExtra("recorderName", recorderName);
-        photoIntent.putExtra("choosenPriority", choosenPriority);
+        photoIntent.putExtra("choosenPriority", priorityBar.getChosenPriority());
         startActivityForResult(photoIntent, REQUEST_TAKE_PHOTO);
-
-    }
-
-    public void setPriority(int progress) {
-        switch (progress) {
-            case 0:
-                setChosenPriority(willNotText, couldText, shouldText, mustText);
-                choosenPriority = "WillNot ";
-                break;
-
-            case 1:
-                setChosenPriority(couldText, willNotText, shouldText, mustText);
-                choosenPriority = "Could ";
-                break;
-
-            case 2:
-                setChosenPriority(shouldText, mustText, couldText, willNotText);
-                choosenPriority = "Should ";
-                break;
-
-            case 3:
-                setChosenPriority(mustText, shouldText, willNotText, couldText);
-                choosenPriority = "Must ";
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void setChosenPriority(TextView chosenPriority, TextView a, TextView b, TextView c){
-        chosenPriority.setTypeface(null, Typeface.BOLD);
-        chosenPriority.setTextSize(16);
-
-        a.setTypeface(null, Typeface.NORMAL);
-        a.setTextSize(14);
-        b.setTypeface(null, Typeface.NORMAL);
-        b.setTextSize(14);
-        c.setTypeface(null, Typeface.NORMAL);
-        c.setTextSize(14);
 
     }
 
@@ -338,5 +243,56 @@ public class CurrentMeetingActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
+    private void convertFile(File file) {
+        IConvertCallback callback = new IConvertCallback() {
+            @Override
+            public void onSuccess(File convertedFile) {
+                file.delete();
+                recordedFileName = convertedFile.getAbsolutePath();
+                try {
+                    FileInputStream fis = new FileInputStream(recordedFileName);
+                    mSpeechService.recognizeInputStream(fis);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                getSizeOfFiles();
+                changeSizeOfFilesTextView();
+            }
 
+            @Override
+            public void onFailure(Exception error) {
+                // Oops! Something went wrong
+            }
+        };
+        AndroidAudioConverter.with(this)
+                .setFile(file)
+                .setFormat(AudioFormat.FLAC)
+                .setCallback(callback)
+                .convert();
+
+    }
+
+    private void getSizeOfFiles(){
+
+        size = 0;
+        sizeSelectedItems = 0;
+
+        String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
+        File directory = new File(path);
+
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        File[] files = directory.listFiles();
+
+        for (File file : files) {
+            if (checkedFileNames.contains(file.getName())) {
+                sizeSelectedItems += file.length();
+            }
+            if (!Objects.equals("email.txt", file.getName())) {
+                size += file.length();
+            }
+        }
+    }
 }
