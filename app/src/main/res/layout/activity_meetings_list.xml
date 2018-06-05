@@ -11,7 +11,7 @@
         android:id="@+id/meetingsListView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="50dp"
+        android:paddingTop="45dp"
         app:layout_constraintBottom_toTopOf="@id/meetingsListButtonsLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -40,14 +40,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/delete" />
+            android:text="@string/delete"
+            android:onClick="deleteCheckedMeetings"
+            />
 
         <Button
             android:id="@+id/checkAllMeetingsButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/check" />
+            android:text="@string/check"
+            android:onClick="checkAllMeetings"
+            />
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
@@ -17,7 +18,9 @@ import java.util.List;
 public class MeetingsListAdapter extends ArrayAdapter<MeetingItem> implements Filterable {
 
     private List<MeetingItem> filteredList;
+
     private List<MeetingItem> meetingItems;
+
     private MeetingFilter meetingFilter;
 
     @NonNull
@@ -57,9 +60,26 @@ public class MeetingsListAdapter extends ArrayAdapter<MeetingItem> implements Fi
 
         MeetingItem meetingItem = getItem(position);
 
+
+
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.meeting_item, parent, false);
         }
+
+        CheckBox checkBox = convertView.findViewById(R.id.meetingCheckBox);
+
+        checkBox.setOnClickListener(v -> {
+            CheckBox cb = (CheckBox) v;
+            MeetingItem mi = (MeetingItem) cb.getTag();
+            if (checkBox.isChecked()) {
+                mi.check();
+            } else {
+                mi.unCheck();
+            }
+        });
+
+        checkBox.setTag(meetingItem);
+        checkBox.setChecked(meetingItem.isChecked());
 
         TextView meetingName = (TextView) convertView.findViewById(R.id.meetingName);
         TextView meetingDate = (TextView) convertView.findViewById(R.id.meetingDate);
