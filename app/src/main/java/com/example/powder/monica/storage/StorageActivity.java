@@ -96,7 +96,9 @@ public class StorageActivity extends AppCompatActivity {
                 AppLog.logString(file.getName());
                 if (file.getName().contains("jpg")) {
                     openImage(file, listView.getContext());
-                } else {
+                } else if(file.getName().contains(".txt")) {
+                    openTextFile(file);
+                }else{
                     openAudio(file);
                 }
             }
@@ -150,6 +152,10 @@ public class StorageActivity extends AppCompatActivity {
 
             popup.show();
         });
+    }
+
+    private void openTextFile(File file) {
+        //TODO handle txt file
     }
 
     @NonNull

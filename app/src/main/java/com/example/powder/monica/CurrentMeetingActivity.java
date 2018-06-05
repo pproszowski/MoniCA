@@ -16,6 +16,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.powder.monica.storage.StorageActivity;
 import com.google.cloud.android.speech.SpeechService;
@@ -23,6 +24,7 @@ import com.google.cloud.android.speech.SpeechService;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -39,8 +41,6 @@ public class CurrentMeetingActivity extends AppCompatActivity {
 
     private static final int REQUEST_TAKE_PHOTO = 2;
 
-    private final SpeechService.Listener mSpeechServiceListener = (text, isFinal) -> System.out.println(text);
-
     private ImageButton recordButton;
 
     private TextView recordingStatus;
@@ -53,6 +53,10 @@ public class CurrentMeetingActivity extends AppCompatActivity {
 
     private String recordedFileName;
 
+    private final SpeechService.Listener mSpeechServiceListener = (text, isFinal) -> {
+        saveTextToFile(text);
+    };
+
     private double size;
 
     private String mailSubject;
@@ -62,7 +66,6 @@ public class CurrentMeetingActivity extends AppCompatActivity {
     private double sizeSelectedItems;
 
     private SpeechService mSpeechService;
-
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
@@ -76,8 +79,19 @@ public class CurrentMeetingActivity extends AppCompatActivity {
             mSpeechService = null;
         }
     };
+    private String path;
     private PriorityBar priorityBar;
+
     private VoiceRecorder voiceRecorder;
+
+    private void saveTextToFile(String text) {
+        try (PrintWriter out = new PrintWriter(recordedFileName.replace(".flac", ".txt"))) {
+            out.println(text);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Couldn't save translation to file", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     @Override
     protected void onStart() {
@@ -272,12 +286,12 @@ public class CurrentMeetingActivity extends AppCompatActivity {
 
     }
 
-    private void getSizeOfFiles(){
+    private void getSizeOfFiles() {
 
         size = 0;
         sizeSelectedItems = 0;
 
-        String path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
+        path = Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName;
         File directory = new File(path);
 
         if (!directory.exists()) {
