@@ -100,7 +100,8 @@ public class MeetingsListAdapter extends ArrayAdapter<MeetingItem> implements Fi
                 ArrayList<MeetingItem> tempList = new ArrayList<>();
 
                 for (MeetingItem meetingItem: meetingItems) {
-                    if (meetingItem.getName().toLowerCase().contains(constraint.toString().toLowerCase())) {
+                    if (meetingItem.getName().toLowerCase().contains(constraint.toString().toLowerCase())
+                            || meetingItem.getDate().toLowerCase().contains(constraint.toString().toLowerCase())) {
                         tempList.add(meetingItem);
                     }
                 }
