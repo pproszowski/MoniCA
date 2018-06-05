@@ -113,7 +113,9 @@ public class FTPSettingActivity extends Activity {
 
     @Override
     public void onPause() {
-        testThread.interrupt();
+        if(testThread != null){
+            testThread.interrupt();
+        }
         super.onPause();
     }
 }
