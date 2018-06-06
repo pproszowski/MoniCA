@@ -12,6 +12,7 @@
         android:layout_width="88dp"
         android:layout_height="48dp"
         android:text="@string/edit"
+        android:onClick="editMeeting"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
