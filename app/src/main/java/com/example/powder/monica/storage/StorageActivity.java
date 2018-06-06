@@ -25,15 +25,20 @@ import android.widget.Toast;
 import com.example.powder.monica.AppLog;
 import com.example.powder.monica.FTP;
 import com.example.powder.monica.OnSwipeTouchListener;
+import com.example.powder.monica.PresentTextActivity;
 import com.example.powder.monica.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 
 public class StorageActivity extends AppCompatActivity {
@@ -155,7 +160,21 @@ public class StorageActivity extends AppCompatActivity {
     }
 
     private void openTextFile(File file) {
-        //TODO handle txt file
+
+        StringBuilder text = new StringBuilder();
+
+        try(FileReader fileReader = new FileReader(file.getAbsoluteFile())){
+            int i;
+            while( (i=fileReader.read()) != -1){
+                text.append((char) i);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Intent intent = new Intent(StorageActivity.this, PresentTextActivity.class);
+        intent.putExtra("googleSpeechResponse", text.toString());
+        startActivity(intent);
     }
 
     @NonNull
