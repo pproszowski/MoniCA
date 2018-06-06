@@ -2,6 +2,7 @@ package com.example.powder.monica;
 
 import android.media.MediaRecorder;
 import android.os.Environment;
+import android.text.format.DateFormat;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,14 +77,12 @@ public class VoiceRecorder {
     private String getFilename() {
         String filepath = Environment.getExternalStorageDirectory().getPath();
         File file = new File(filepath, recorderName + "/" + meetingName);
-
+        String time = "hh:mm:ss";
         if (!file.exists()) {
             file.mkdirs();
         }
         return (file.getAbsolutePath() + "/" + chosenPriority + "Rec "
-                + Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "꞉"
-                + Calendar.getInstance().get(Calendar.MINUTE) + "꞉"
-                + Calendar.getInstance().get(Calendar.SECOND)
+                + DateFormat.format(time, Calendar.getInstance().getTime())
                 + file_exts[currentFormat]);
 
     }
