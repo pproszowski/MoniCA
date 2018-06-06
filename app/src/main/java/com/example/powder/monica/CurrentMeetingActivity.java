@@ -139,34 +139,6 @@ public class CurrentMeetingActivity extends AppCompatActivity {
         super.onStop();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.ftp_setting, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.ftp_settings_action_bar: {
-                startActivity(new Intent(CurrentMeetingActivity.this, FTPSettingActivity.class));
-                return true;
-            }
-
-            case R.id.user_settings_action_bar: {
-                Intent intent = new Intent(this, UserSettingActivity.class);
-                intent.putExtra("Name", meetingName);
-                intent.putExtra("recorderName", recorderName);
-                intent.putExtra("email", "");
-                startActivity(intent);
-                return true;
-            }
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
     @SuppressLint("SetTextI18n")
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -203,6 +175,14 @@ public class CurrentMeetingActivity extends AppCompatActivity {
         super.onResume();
         getSizeOfFiles();
         changeSizeOfFilesTextView();
+    }
+
+    public void editMeeting(View view) {
+        Intent intent = new Intent(this, EditMeetingActivity.class);
+        intent.putExtra("Name", meetingName);
+        intent.putExtra("recorderName", recorderName);
+        intent.putExtra("mailSubject", mailSubject);
+        startActivity(intent);
     }
 
     public void goToStorage(View view) {

@@ -37,9 +37,6 @@
             android:name=".MakePhotoActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".UserSettingActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".FTPSettingActivity"
             android:screenOrientation="portrait" />
 
@@ -58,11 +55,11 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        <activity android:name=".AddEmail" />
 
         <service android:name="com.google.cloud.android.speech.SpeechService" />
 
-        <activity android:name=".PresentTextActivity"></activity>
+        <activity android:name=".PresentTextActivity" />
+        <activity android:name=".EditMeetingActivity"></activity>
     </application>
 
 </manifest>

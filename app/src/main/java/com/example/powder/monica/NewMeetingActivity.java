@@ -55,15 +55,18 @@ public class NewMeetingActivity extends AppCompatActivity {
         addNewEmailButton = findViewById(R.id.addNewEmailButton);
 
         addNewEmailButton.setOnClickListener((view) -> {
-            String email = inputEmail.getText().toString();
-            Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
+                    String email = inputEmail.getText().toString();
+                    Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
 
-                    if (matcher.matches()) {
-                        mAutoLabel.addLabel(email);
-                        inputEmail.setText("");
-                    }
-                    else {
-                        Toast.makeText(NewMeetingActivity.this, "Invalid e-mail address!", Toast.LENGTH_SHORT).show();
+                    if (mAutoLabel.getLabelsCounter() <= 20) {
+                        if (matcher.matches()) {
+                            mAutoLabel.addLabel(email);
+                            inputEmail.setText("");
+                        } else {
+                            Toast.makeText(NewMeetingActivity.this, "Invalid e-mail address!", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(NewMeetingActivity.this, "You can enter only 20 e-mails!", Toast.LENGTH_SHORT).show();
                     }
                 }
         );
