@@ -125,6 +125,14 @@ public class EditMeetingActivity extends AppCompatActivity {
                     writer.close();
                 }
 
+                File fileOriginal = new File(Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName);
+
+                if (fileOriginal.isDirectory()) {
+                    File fileToChange = new File(Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingNameInput.getText().toString());
+                    fileOriginal.renameTo(fileToChange);
+                }
+
+
 
                 Intent newIntent = new Intent(EditMeetingActivity.this, CurrentMeetingActivity.class);
                 newIntent.putExtra("Name", meetingNameInput.getText().toString());
