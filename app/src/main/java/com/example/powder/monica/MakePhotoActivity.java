@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
+import android.text.format.DateFormat;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -52,10 +53,9 @@ public class MakePhotoActivity extends Activity {
             try {
                 photoFile = createImageFile();
 
+                String time = "hh:mm:ss";
                 String newName = choosenPriority + "Img "
-                        + Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "꞉"
-                        + Calendar.getInstance().get(Calendar.MINUTE) + "꞉"
-                        + Calendar.getInstance().get(Calendar.SECOND) + ".jpg";
+                        + DateFormat.format(time, Calendar.getInstance().getTime()) + ".jpg";
 
 
                 newNameFile = new File(Environment.getExternalStorageDirectory().getPath() + "/" + recorderName + "/" + meetingName, newName);
