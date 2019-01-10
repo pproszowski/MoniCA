@@ -7,10 +7,10 @@
     <string name="default_directory">monicaFTP</string>>
     -->
 
-    <string name="default_hostname">ftp.mkwk018.cba.pl</string>
-    <string name="default_login">aras112</string>
-    <string name="default_password">zaq1@WSX</string>
-    <string name="default_directory">aras.cba.pl</string>>
+    <string name="default_hostname">hostname</string>
+    <string name="default_login">login</string>
+    <string name="default_password">password</string>
+    <string name="default_directory">directory</string>>
 
 
 </resources>
